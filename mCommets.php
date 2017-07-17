@@ -8,7 +8,7 @@ function getChild(&$arr, $num, $id) {
 	}
 
 	foreach ($arr[$num] as $key => $val) {
-		if ( $val->parent_id == $id ) {
+		if ( $val->parent == $id ) {
 			$out[] = $val;
 			$del[] = $key;
 		}
