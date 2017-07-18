@@ -44,6 +44,7 @@ function getComments( $path = null ){
 	$db = JFactory::getDbo();
 	$out = array();
 
+	// make $path
 	$query = $db->getQuery(true)
 		->select($db->qn('table_name'))
 		->from($db->qn('#__mcommetns_ids'))
@@ -54,7 +55,21 @@ function getComments( $path = null ){
 	$query = $db->getQuery(true)
 		->select('*')
 		->from($from)
-		->where($db->qn('state').' = 1')
+		->where($db->qn('state').' = 1 AND '.$db->qn('level').' = 0')
+		->order($db->qn('utime').' DESC')
+		->limit(20);
+	$comments0 = $db->setQuery($query)
+		->loadObjectList();
+
+	$ids = array();
+	foreach ($comments0 as $key => $val) {
+		$ids[] = $val->id;	
+	}
+
+	$query = $db->getQuery(true)
+		->select('*')
+		->from($from)
+		->where($db->qn('state').' = 1 AND '..' in ('.implode(', ', $ids).')')
 		->order($db->qn('utime').' DESC');
 	$comments = $db->setQuery($query)
 		->loadObjectList();
@@ -69,7 +84,7 @@ function getComments( $path = null ){
 	}
 
 	$out = '<div class="ShliambOff" table="'.$from.'"></div>'
-	foreach ($commentsByLevel[0] as $key => $val) {
+	foreach ($comments0 as $key => $val) {
 		$out = 	'<div class="mcLevel0" mcid="'.$val->id.'">
 					<div class="mcEmail">'.$val->email.'</div>
 					<div class="mcMessаge">'.$val->message.'</div>

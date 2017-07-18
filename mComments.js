@@ -1,9 +1,10 @@
 function mComments() {
-	jQuery('.mcButton').on('click', addCommets_mc);
+	jQuery('.mcButton').on('click', addCommet_mc);
+	// jQuery('.mcMore').on('click', addCommets_mc);
 	jQuery('.mcAnswer').on('click', addCommetForm_mc);
 }
 
-function addCommets_mc(event) {
+function addCommet_mc(event) {
 	event.preventDefault();
 
 	var $this = jQuery(this),
@@ -27,15 +28,34 @@ function addCommets_mc(event) {
 						'<div class="mcMessаge">'+data.message+'</div>' +
 						'<div class="mcAnswer">Ответить</div>' +
 					'</div>';
+			
 			jQuery(div).insertAfter(comment);
-			comment.addClass('ShliamOff');
+			
 			email.val('');
 			msg.val('');
 			comment.attr('mcid', 0);
+
+			if (comment.hasClass('mcFormFloat')) {
+				comment.addClass('ShliamOff');
+			}
 		}
 	});
 }
 
+// late
+// function addCommets_mc(event) {
+// 	event.preventDefault();
+// }
+
 function addCommetForm_mc(event) {
 	event.preventDefault();
+
+	var $this = jQuery(this),
+		mc = $this.parents('.mComments'),
+		comment = $this.parent(),
+		parent = comment.attr('mcid'),
+		floatForm = mc.find('.mcFormFloat');
+
+	comment.insertAfter(floatForm);
+	floatForm.after(comment).attr('mcid', parent).removeClass('ShliambOff');
 }
