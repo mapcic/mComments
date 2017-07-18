@@ -69,7 +69,7 @@ function getComments( $path = null ){
 	$query = $db->getQuery(true)
 		->select('*')
 		->from($from)
-		->where($db->qn('state').' = 1 AND '..' in ('.implode(', ', $ids).')')
+		->where($db->qn('state').' = 1 AND '.$db->qn('parent').' in ('.implode(', ', $ids).')')
 		->order($db->qn('utime').' DESC');
 	$comments = $db->setQuery($query)
 		->loadObjectList();
