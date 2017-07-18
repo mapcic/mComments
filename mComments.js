@@ -9,6 +9,7 @@ function addCommet_mc(event) {
 
 	var $this = jQuery(this),
 		mc = $this.parents('.mComments'),
+		table = mc.find('.mcTable').attr('table'),
 		comment = $this.parents('.mcForm'),
 		parent = comment.attr('mcid'),
 		email = comment.find('.mcEmail'),

@@ -83,7 +83,7 @@ function getComments( $path = null ){
 		$commentsByLevel[$val->level][] = $val;	
 	}
 
-	$out = '<div class="ShliambOff" table="'.$from.'"></div>'
+	$out = '<div class="ShliambOff mcTable" table="'.$from.'"></div>'
 	foreach ($comments0 as $key => $val) {
 		$out = 	'<div class="mcLevel0" mcid="'.$val->id.'">
 					<div class="mcEmail">'.$val->email.'</div>
