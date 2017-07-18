@@ -1,18 +1,22 @@
 <div class="mComments">
-	<div class="mcForm">
+	<div class="mcForm" mcid="0">
 		<div class="mcFormText">SomeText</div>
+		<input type="text" name="email" class="mcEmail">
 		<textarea name="mcComment"></textarea>
 		<div class="mcButton"></div>
 	</div>
-	<div class="mcFormFloat ShliambOff">
+	<div class="mcForm mcFormFloat ShliambOff" mcid="">
 		<div class="mcFormText">SomeText</div>
-		<textarea name="mcComment"></textarea>
+		<input type="text" name="email" class="mcEmail">
+		<textarea class="mcComment"></textarea>
 		<div class="mcButton"></div>
 	</div>
 	<div class="mcComments"><?php
 		getComments(JURI::getPath());	
 	?></div>
 </div>
+
+<script onload="mCommets()" src="path/to/mComments.js" type="text/javascript" defer></script>
 
 <!-- Structure example -->
 <div class="mComments" page="">
@@ -32,9 +36,9 @@
 	<div class="mcComments">
 		<div class="mcLevel0" mcid="">
 			<div class="mcEmail"></div>
+			<div class="mcTime"></div>
 			<div class="mcMessаge"></div>
 			<div class="mcAnswer">Ответить</div>
 		</div>
 	</div>
-
 </div>
