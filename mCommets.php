@@ -30,7 +30,7 @@ function printChild(&$arr, $num, $id) {
 	}
 	
 	foreach ($child as $key => $val) {
-		$out = '<div class="mcLevel'.$val->num.'" mcid="'.$val->id.'">
+		$out = $out.'<div class="mcLevel'.$val->level.'" mcid="'.$val->id.'">
 					<div class="mcEmail">'.$val->email.'</div>
 					<div class="mcMessаge">'.$val->message.'</div>
 					<div class="mcAnswer">Ответить</div>
@@ -44,11 +44,12 @@ function getComments( $path = null ){
 	$db = JFactory::getDbo();
 	$out = array();
 
-	// make $path
+	$path = urldecode((JFactory::getURI())->getPath()); 
+
 	$query = $db->getQuery(true)
 		->select($db->qn('table_name'))
-		->from($db->qn('#__mcommetns_ids'))
-		->where($db->qn('path').' = '.$path);
+		->from($db->qn('#__mcomments_ids'))
+		->where($db->qn('path').' = '.$db->q($path));
 	$from = $db->setQuery($query)
 		->loadResult();
 
@@ -57,7 +58,7 @@ function getComments( $path = null ){
 		->from($from)
 		->where($db->qn('state').' = 1 AND '.$db->qn('level').' = 0')
 		->order($db->qn('utime').' DESC')
-		->limit(20);
+		->setLimit(20);
 	$comments0 = $db->setQuery($query)
 		->loadObjectList();
 
@@ -69,7 +70,7 @@ function getComments( $path = null ){
 	$query = $db->getQuery(true)
 		->select('*')
 		->from($from)
-		->where($db->qn('state').' = 1 AND '.$db->qn('parent').' in ('.implode(', ', $ids).')')
+		->where($db->qn('state').' = 1 AND '.$db->qn('level').' <> 0')
 		->order($db->qn('utime').' DESC');
 	$comments = $db->setQuery($query)
 		->loadObjectList();
@@ -83,9 +84,8 @@ function getComments( $path = null ){
 		$commentsByLevel[$val->level][] = $val;	
 	}
 
-	$out = '<div class="ShliambOff mcTable" table="'.$from.'"></div>'
 	foreach ($comments0 as $key => $val) {
-		$out = 	'<div class="mcLevel0" mcid="'.$val->id.'">
+		$out = '<div class="mcLevel0" mcid="'.$val->id.'">
 					<div class="mcEmail">'.$val->email.'</div>
 					<div class="mcMessаge">'.$val->message.'</div>
 					<div class="mcAnswer">Ответить</div>
@@ -93,6 +93,8 @@ function getComments( $path = null ){
 		$out = $out.printChild($commentsByLevel, 1, $val->id);
 		echo $out;
 	}
+
+	echo '<div class="ShliambOff mcTable" table="'.$from.'"></div>';
 	return 1;
 }
 ?>
