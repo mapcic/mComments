@@ -12,7 +12,8 @@ $parent = $_POST['parent'];
 $table = $_POST['table'];
 
 $db = JFactory::getDbo();
-if ( !preg_match('/'.$db->getPrefix().'mcomments_.+/', subject) ) {
+
+if ( !preg_match('/'.$db->getPrefix().'mcomments_.+/', $table) ) {
 	return 0;
 }
 
@@ -25,10 +26,10 @@ $comment = (object) array(
 );
 
 $id = 0;
-$db->insertObject($table, $comment, $id);
+$db->insertObject($table, $comment);
 
-$comment->id = $id;
+$comment->id = (int)$db->insertid();
 
-echo json_incode($comment);
+echo json_encode($comment);
 return 1;
 ?>
