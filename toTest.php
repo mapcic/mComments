@@ -1,0 +1,171 @@
+{source}
+ <?php
+function mCommetntsInit(){
+	$db = JFactory::getDbo();
+
+	$query = $db->getQuery(true)
+		->select(array('id', 'path', 'home'))
+		->from($db->qn('#__menu'))
+		->where($db->qn('published').' = 1 AND '.$db->qn('link').' LIKE "%option=com_content%"');
+	$pages = $db->setQuery($query)
+		->loadObjectList();
+
+	$query = 'CREATE TABLE IF NOT EXISTS `#__mcomments_ids` ( `id` int(11) NOT NULL AUTO_INCREMENT, `home` int(1) DEFAULT 0, `path` varchar(255) NOT NULL, `table_name` varchar(255) NOT NULL, PRIMARY KEY (`id`) );';
+	$db->setQuery($query)
+		->query();
+
+	foreach ($pages as $key => $val) {
+		$page = (object) array(
+			'table_name' => $db->getPrefix().'mcomments_'.$val->id,
+			'path' => '/'.$val->path,
+			'home' => $val->home
+		);
+
+		$query = $db->getQuery('true')
+			->select($db->qn('id'))
+			->from($db->qn('#__mcomments_ids'))
+			->where($db->qn('path').' = "'.$page->path.'"');
+		$resp = $db->setQuery($query)
+			->loadResult();
+
+		if (!empty($resp)) {
+			continue;
+		}
+
+		$db->insertObject('#__mcomments_ids', $page);
+
+		$query = 'CREATE TABLE IF NOT EXISTS `'.$page->table_name.'` ( `id` int(11) NOT NULL AUTO_INCREMENT, `email` varchar(255) NOT NULL, `message` mediumtext NOT NULL, `parent` int(11) DEFAULT 0, `utime` int(11) DEFAULT 0, `level` int(11) DEFAULT 0, `state` int(11) DEFAULT 1, PRIMARY KEY (`id`) );';
+		$db->setQuery($query)
+			->query();
+	}
+}
+
+mCommetntsInit();
+?>
+
+<style>
+	.ShliambOff {
+		display : none;
+	}
+</style>
+
+<?php 
+function getChild(&$arr, $num, $id) {
+	$out = array();
+	$key = array();
+
+	if ($num > count($arr)){
+		return $out;
+	}
+
+	foreach ($arr[$num] as $key => $val) {
+		if ( $val->parent == $id ) {
+			$out[] = $val;
+			$del[] = $key;
+		}
+	}
+
+	foreach ($del as $key => $val) {
+		unset($arr[$num][$val]);
+	}
+
+	return $out;
+}
+
+function printChild(&$arr, $num, $id) {
+	$out = '';
+	$child = getChild($arr, $num, $id);
+
+	if (empty($child)) {
+		return $out;	
+	}
+	
+	foreach ($child as $key => $val) {
+		$out = $out.'<div class="mcLevel'.$val->level.'" mcid="'.$val->id.'">
+					<div class="mcEmail">'.$val->email.'</div>
+					<div class="mcMessаge">'.$val->message.'</div>
+					<div class="mcAnswer">Ответить</div>
+				</div>';
+		$out = $out.printChild($arr, $num+1, $val->id);
+	}
+	return $out;
+}
+
+function getComments( $path = null ){
+	$db = JFactory::getDbo();
+	$out = array();
+
+	$path = urldecode((JFactory::getURI())->getPath()); 
+
+	$query = $db->getQuery(true)
+		->select($db->qn('table_name'))
+		->from($db->qn('#__mcomments_ids'))
+		->where($db->qn('path').' = '.$db->q($path));
+	$from = $db->setQuery($query)
+		->loadResult();
+
+	$query = $db->getQuery(true)
+		->select('*')
+		->from($from)
+		->where($db->qn('state').' = 1 AND '.$db->qn('level').' = 0')
+		->order($db->qn('utime').' DESC')
+		->setLimit(20);
+	$comments0 = $db->setQuery($query)
+		->loadObjectList();
+
+	$ids = array();
+	foreach ($comments0 as $key => $val) {
+		$ids[] = $val->id;	
+	}
+
+	$query = $db->getQuery(true)
+		->select('*')
+		->from($from)
+		->where($db->qn('state').' = 1 AND '.$db->qn('level').' <> 0')
+		->order($db->qn('utime').' DESC');
+	$comments = $db->setQuery($query)
+		->loadObjectList();
+
+	if (empty($comments)) {
+		return 1;
+	}
+
+	$commentsByLevel = array();
+	foreach ($comments as $key => $val) {
+		$commentsByLevel[$val->level][] = $val;	
+	}
+
+	foreach ($comments0 as $key => $val) {
+		$out = '<div class="mcLevel0" mcid="'.$val->id.'">
+					<div class="mcEmail">'.$val->email.'</div>
+					<div class="mcMessаge">'.$val->message.'</div>
+					<div class="mcAnswer">Ответить</div>
+				</div>';
+		$out = $out.printChild($commentsByLevel, 1, $val->id);
+		echo $out;
+	}
+
+	echo '<div class="ShliambOff mcTable" table="'.$from.'"></div>';
+	return 1;
+}
+?>
+
+<div class="mComments">
+	<div class="mcForm" mcid="0">
+		<div class="mcFormText">SomeText</div>
+		<input type="text" name="email" class="mcEmail">
+		<textarea class="mcText"></textarea>
+		<div class="mcButton">Отправить</div>
+	</div>
+	<div class="mcForm mcFormFloat ShliambOff" mcid="">
+		<div class="mcFormText">SomeText</div>
+		<input type="text" name="email" class="mcEmail">
+		<textarea class="mcTextarea"></textarea>
+		<div class="mcButton">Отправить</div>
+	</div>
+	<div class="mcComments"><?php
+		getComments();	
+	?></div>
+	<!-- <div class="mcMore"></div> -->
+</div>
+{/source}
