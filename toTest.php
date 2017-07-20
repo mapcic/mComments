@@ -1,4 +1,104 @@
 {source}
+<script type="text/javascript">
+function mComments() {
+	jQuery('.mcButton').on('click', addCommet_mc);
+	// jQuery('.mcMore').on('click', addCommets_mc);
+	jQuery('.mcAnswer').on('click', addCommetForm_mc);
+}
+
+function addCommet_mc(event) {
+	event.preventDefault();
+
+	var $this = jQuery(this),
+		mc = $this.parents('.mComments'),
+		table = mc.find('.mcTable').attr('table'),
+		comment = $this.parents('.mcForm'),
+		parent = comment.attr('mcid'),
+		email = comment.find('.mcEmail'),
+		level = comment.attr('level'),
+		msg = comment.find('.mcTextarea');
+
+	console.log(msg.val());
+	console.log(email.val());
+	console.log(table);
+	console.log(parent);
+
+	
+	if ( !isMsg(msg.val()) || !isEmail(email.val()) ) {
+		console.log('empty')
+		return 0;
+	}
+
+	jQuery.ajax({
+		type : 'POST', url : '/templates/protostar/php/mCommentsAdd.php', dataType: 'json', 
+		data: { email : email.val(), msg : msg.val(), parent : parent, table: table, level: level },
+		success: function( data ) {
+	console.log('goood')
+	console.log(data);
+	console.log(data.message);
+	console.log(data.email);
+	console.log(data.id);
+			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'+data.id+'">' +
+						'<div class="mcEmail">'+data.email+'</div>' +
+						'<div class="mcTime">'+data.utime+'</div>' +
+						'<div class="mcMessаge">'+data.message+'</div>' +
+						'<div class="mcAnswer">Ответить</div>' +
+					'</div>';
+			
+			jQuery(div).insertAfter(comment);
+			
+			email.val('');
+			msg.val('');
+			comment.attr('mcid', 0);
+
+			if (comment.hasClass('mcFormFloat')) {
+				comment.addClass('ShliamOff');
+			}
+		}
+	});
+}
+
+// late
+// function addCommets_mc(event) {
+// 	event.preventDefault();
+// }
+
+function addCommetForm_mc(event) {
+	event.preventDefault();
+
+	var $this = jQuery(this),
+		mc = $this.parents('.mComments'),
+		comment = $this.parent(),
+		parent = comment.attr('mcid'),
+		floatForm = mc.find('.mcFormFloat');
+
+	comment.insertAfter(floatForm);
+	floatForm.after(comment).attr('mcid', parent).removeClass('ShliambOff');
+}
+
+function clearString( str ) {
+    return str.replace(/^\s+|\s+$/g,''); 
+}
+
+function isEmail( email ) {
+    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+}
+
+function isMsg( msg ) {
+	if(clearString(msg) == '') {
+		return false;
+	}
+	return true;
+}
+
+jQuery(document).ready(function(){
+	mComments();
+});
+</script>
+
+
+
  <?php
 function mCommetntsInit(){
 	$db = JFactory::getDbo();
@@ -81,7 +181,7 @@ function printChild(&$arr, $num, $id) {
 	}
 	
 	foreach ($child as $key => $val) {
-		$out = $out.'<div class="mcLevel'.$val->level.'" mcid="'.$val->id.'">
+		$out = $out.'<div class="mcComment mcLevel'.$val->level.'" mcid="'.$val->id.'" level="'.$val->level.'">
 					<div class="mcEmail">'.$val->email.'</div>
 					<div class="mcMessаge">'.$val->message.'</div>
 					<div class="mcAnswer">Ответить</div>
@@ -136,7 +236,7 @@ function getComments( $path = null ){
 	}
 
 	foreach ($comments0 as $key => $val) {
-		$out = '<div class="mcLevel0" mcid="'.$val->id.'">
+		$out = '<div class="mcComment mcLevel0" mcid="'.$val->id.'" level="0">
 					<div class="mcEmail">'.$val->email.'</div>
 					<div class="mcMessаge">'.$val->message.'</div>
 					<div class="mcAnswer">Ответить</div>
@@ -151,13 +251,13 @@ function getComments( $path = null ){
 ?>
 
 <div class="mComments">
-	<div class="mcForm" mcid="0">
+	<div class="mcForm" mcid="0" level="0">
 		<div class="mcFormText">SomeText</div>
 		<input type="text" name="email" class="mcEmail">
-		<textarea class="mcText"></textarea>
+		<textarea class="mcTextarea"></textarea>
 		<div class="mcButton">Отправить</div>
 	</div>
-	<div class="mcForm mcFormFloat ShliambOff" mcid="">
+	<div class="mcForm mcFormFloat ShliambOff" mcid="" level="">
 		<div class="mcFormText">SomeText</div>
 		<input type="text" name="email" class="mcEmail">
 		<textarea class="mcTextarea"></textarea>

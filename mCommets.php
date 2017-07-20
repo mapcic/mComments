@@ -30,7 +30,7 @@ function printChild(&$arr, $num, $id) {
 	}
 	
 	foreach ($child as $key => $val) {
-		$out = $out.'<div class="mcLevel'.$val->level.'" mcid="'.$val->id.'">
+		$out = $out.'<div class="mcComment mcLevel'.$val->level.'" mcid="'.$val->id.'" level="'.$val->level.'">
 					<div class="mcEmail">'.$val->email.'</div>
 					<div class="mcMessаge">'.$val->message.'</div>
 					<div class="mcAnswer">Ответить</div>
@@ -85,7 +85,7 @@ function getComments( $path = null ){
 	}
 
 	foreach ($comments0 as $key => $val) {
-		$out = '<div class="mcLevel0" mcid="'.$val->id.'">
+		$out = '<div class="mcComment mcLevel0" mcid="'.$val->id.'" level="0">
 					<div class="mcEmail">'.$val->email.'</div>
 					<div class="mcMessаge">'.$val->message.'</div>
 					<div class="mcAnswer">Ответить</div>

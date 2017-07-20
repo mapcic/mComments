@@ -20,8 +20,8 @@ function addCommet_mc(event) {
 	}
 
 	jQuery.ajax({
-		type : 'POST', url : '/path/to/mComments_Add.php', dataType: 'json', 
-		data: { email : email, msg : msg, parent : parent },
+		type : 'POST', url : '/path/to/mCommentsAdd.php', dataType: 'json', 
+		data: { email : email, msg : msg, parent : parent, table: table },
 		success: function( data ) {	
 			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'.data.id.'">' +
 						'<div class="mcEmail">'+data.email+'</div>' +
