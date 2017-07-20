@@ -35,7 +35,7 @@ function printChild(&$arr, $num, $id) {
 					<div class="mcMessаge">'.$val->message.'</div>
 					<div class="mcAnswer">Ответить</div>
 				</div>';
-		$out = $out.printChild($commentsByLevel, $num+1, $val->id);
+		$out = $out.printChild($arr, $num+1, $val->id);
 	}
 	return $out;
 }

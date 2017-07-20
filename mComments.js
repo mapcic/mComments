@@ -13,7 +13,7 @@ function addCommet_mc(event) {
 		comment = $this.parents('.mcForm'),
 		parent = comment.attr('mcid'),
 		email = comment.find('.mcEmail'),
-		msg = comment.find('.mcComment');
+		msg = comment.find('.mcTextarea');
 	
 	if ( !isMsg(msg.val()) || !isEmail(email.val()) ) {
 		return 0;
@@ -23,7 +23,7 @@ function addCommet_mc(event) {
 		type : 'POST', url : '/path/to/mComments_Add.php', dataType: 'json', 
 		data: { email : email, msg : msg, parent : parent },
 		success: function( data ) {	
-			var div = '<div class="mcLevel'+data.level+'" mcid="'.data.id.'">' +
+			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'.data.id.'">' +
 						'<div class="mcEmail">'+data.email+'</div>' +
 						'<div class="mcTime">'+data.utime+'</div>' +
 						'<div class="mcMessаge">'+data.message+'</div>' +
