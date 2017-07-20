@@ -18,12 +18,6 @@ function addCommet_mc(event) {
 		level = comment.attr('level'),
 		msg = comment.find('.mcTextarea');
 
-	console.log(msg.val());
-	console.log(email.val());
-	console.log(table);
-	console.log(parent);
-
-	
 	if ( !isMsg(msg.val()) || !isEmail(email.val()) ) {
 		console.log('empty')
 		return 0;
@@ -33,11 +27,6 @@ function addCommet_mc(event) {
 		type : 'POST', url : '/templates/protostar/php/mCommentsAdd.php', dataType: 'json', 
 		data: { email : email.val(), msg : msg.val(), parent : parent, table: table, level: level },
 		success: function( data ) {
-	console.log('goood')
-	console.log(data);
-	console.log(data.message);
-	console.log(data.email);
-	console.log(data.id);
 			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'+data.id+'">' +
 						'<div class="mcEmail">'+data.email+'</div>' +
 						'<div class="mcTime">'+data.utime+'</div>' +
