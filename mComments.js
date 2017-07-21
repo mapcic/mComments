@@ -1,6 +1,18 @@
 function mComments() {
 	jQuery('.mcButton').on('click', addCommet_mc);
 	jQuery('.mcAnswer').on('click', addCommetFloatForm_mc);
+	jQuery('.mcMore').each(function(ind, val){
+		var $this = jQuery(this),
+			info = jQuery(this).parents('.mComments').find('.mcTable'),
+			num = info.attr('num'),
+			len = info.attr('len');
+
+		$this.attr('num', num).attr('len', len);
+
+		if ( +num < +len) {
+			$this.removeClass('ShliambOff').off('click', moreComments_mc);
+		}
+	});
 }
 
 function addCommet_mc(event) {
@@ -39,7 +51,7 @@ function addCommet_mc(event) {
 			comment.attr('mcid', 0);
 
 			if (comment.hasClass('mcFormFloat')) {
-				comment.addClass('ShliamOff');
+				comment.addClass('ShliambOff');
 			}
 		}
 	});
@@ -57,6 +69,36 @@ function addCommetFloatForm_mc(event) {
 
 	comment.after(floatForm);
 	floatForm.attr('mcid', parent).attr('level', +level+1).removeClass('ShliambOff');
+}
+
+function moreComments_mc(event) {
+	event.preventDefault();
+
+	var $this = jQuery(this),
+		len = $this.attr('len'),
+		num = $this.attr('num');
+
+	jQuery.ajax({
+		type : 'POST', url : '/templates/protostar/php/mCommentsMore.php', dataType: 'json', 
+		data: { len: len, num: num },
+		success: function( data ) {
+			$this.attr('len', data.len).attr('num', data.num);
+			if (data.num >= data.len) {
+				$this.addClass('ShliambOff').off('click', moreComments_mc);
+			}
+
+			jQuery.each(data.items, function(ind, val) {
+				var div = '<div class="mcComment mcLevel'+val.level+'" mcid="'+val.id+'">' +
+							'<div class="mcEmail">'+val.email+'</div>' +
+							'<div class="mcTime">'+val.utime+'</div>' +
+							'<div class="mcMessаge">'+val.message+'</div>' +
+							'<div class="mcAnswer">Ответить</div>' +
+						'</div>',
+					comments = $this.parents('.mComments').find('.mcComments');
+				div.appendTo(comments).find('.mcAnswer').on('click', addCommetFloatForm_mc);
+			});
+		}
+	});
 }
 
 function clearString( str ) {
