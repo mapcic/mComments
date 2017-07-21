@@ -5,7 +5,7 @@ define('JPATH_BASE', preg_replace('/(?:\/[\w\-]+){3}$/', '', dirname(__FILE__)))
 require_once (JPATH_BASE .DS.'includes'.DS.'defines.php');
 require_once (JPATH_BASE .DS.'includes'.DS.'framework.php');
 
-function getChild(&$arr, $num, $id) {
+function findChild(&$arr, $num, $id) {
 	$out = array();
 	$key = array();
 
@@ -27,15 +27,17 @@ function getChild(&$arr, $num, $id) {
 	return $out;
 }
 
-function sortComments(&$arr, $level=0) {
+function getChild(&$arr, $num, $id) {
 	$out = array();
-	foreach ($arr as $key => $val) {
-		$child = getChild($commentsByLevel, $val->level + 1, $val->id);
-		if (empty($child)) {
-			$out[] = $val;
-		} else {
-			$out[] = array_merge($out, sortComments($arr, $val->level + 1));
-		}
+	$child = findChild($arr, $num, $id);
+
+	if (empty($child)) {
+		return $out;	
+	}
+	
+	foreach ($child as $key => $val) {
+		$out[] = $val;
+		$out = array_merge($out, getChild($arr, $val->level + 1, $val->id));
 	}
 	return $out;
 }
@@ -43,7 +45,7 @@ function sortComments(&$arr, $level=0) {
 $offset = $_POST['num'];
 $len = $_POST['len'];
 $from = $_POST['table'];
-$num = 20;
+$num = 2;
 
 $db = JFactory::getDbo();
 $query = $db->getQuery(true)
@@ -71,7 +73,12 @@ foreach ($comments as $key => $val) {
 $out = (object) array(
 	'num' => $offset + count($comments0),
 	'len' => $len,
-	'items' => sortComments(array_merge($comments0, $commentsByLevel))
+	'items' => array()
 );
+
+foreach ($comments0 as $key => $val) {
+	$out->items[] = $val;
+	$out->items = array_merge($out->items, getChild($commentsByLevel, $val->level + 1, $val->id));
+}
 echo json_encode($out);
 ?>

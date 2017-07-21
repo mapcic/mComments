@@ -11,7 +11,7 @@ function mComments() {
 		$this.attr('num', num).attr('len', len).attr('table', table);
 
 		if ( +num < +len) {
-			$this.removeClass('ShliambOff').off('click', moreComments_mc);
+			$this.removeClass('ShliambOff').on('click', moreComments_mc);
 		}
 	});
 }
@@ -29,7 +29,6 @@ function addCommet_mc(event) {
 		msg = comment.find('.mcTextarea');
 
 	if ( !isMsg(msg.val()) || !isEmail(email.val()) ) {
-		console.log('empty')
 		return 0;
 	}
 
@@ -37,8 +36,7 @@ function addCommet_mc(event) {
 		type : 'POST', url : '/templates/protostar/php/mCommentsAdd.php', dataType: 'json', 
 		data: { email : email.val(), msg : msg.val(), parent : parent, table: table, level: level },
 		success: function( data ) {
-			console.log(data);
-			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'+data.id+'">' +
+			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'+data.id+'" level="'+data.level+'">' +
 						'<div class="mcEmail">'+data.email+'</div>' +
 						'<div class="mcTime">'+data.utime+'</div>' +
 						'<div class="mcMessаge">'+data.message+'</div>' +
@@ -90,7 +88,7 @@ function moreComments_mc(event) {
 			}
 
 			jQuery.each(data.items, function(ind, val) {
-				var div = '<div class="mcComment mcLevel'+val.level+'" mcid="'+val.id+'">' +
+				var div = '<div class="mcComment mcLevel'+val.level+'" mcid="'+val.id+'" level="'+val.level+'">' +
 							'<div class="mcEmail">'+val.email+'</div>' +
 							'<div class="mcTime">'+val.utime+'</div>' +
 							'<div class="mcMessаge">'+val.message+'</div>' +

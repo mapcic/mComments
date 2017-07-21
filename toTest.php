@@ -1,8 +1,27 @@
 {source}
+<style type="text/css">
+	.ShliambOff {
+		display: none;
+	}
+</style>
+
 <script type="text/javascript">
 function mComments() {
 	jQuery('.mcButton').on('click', addCommet_mc);
 	jQuery('.mcAnswer').on('click', addCommetFloatForm_mc);
+	jQuery('.mcMore').each(function(ind, val){
+		var $this = jQuery(this),
+			info = jQuery(this).parents('.mComments').find('.mcTable'),
+			table = info.attr('table'),
+			num = info.attr('num'),
+			len = info.attr('len');
+
+		$this.attr('num', num).attr('len', len).attr('table', table);
+
+		if ( +num < +len) {
+			$this.removeClass('ShliambOff').on('click', moreComments_mc);
+		}
+	});
 }
 
 function addCommet_mc(event) {
@@ -27,7 +46,7 @@ function addCommet_mc(event) {
 		data: { email : email.val(), msg : msg.val(), parent : parent, table: table, level: level },
 		success: function( data ) {
 			console.log(data);
-			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'+data.id+'">' +
+			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'+data.id+'" level="'+data.level+'">' +
 						'<div class="mcEmail">'+data.email+'</div>' +
 						'<div class="mcTime">'+data.utime+'</div>' +
 						'<div class="mcMessаge">'+data.message+'</div>' +
@@ -41,7 +60,7 @@ function addCommet_mc(event) {
 			comment.attr('mcid', 0);
 
 			if (comment.hasClass('mcFormFloat')) {
-				comment.addClass('ShliamOff');
+				comment.addClass('ShliambOff');
 			}
 		}
 	});
@@ -59,6 +78,37 @@ function addCommetFloatForm_mc(event) {
 
 	comment.after(floatForm);
 	floatForm.attr('mcid', parent).attr('level', +level+1).removeClass('ShliambOff');
+}
+
+function moreComments_mc(event) {
+	event.preventDefault();
+
+	var $this = jQuery(this),
+		table = $this.attr('table')
+		len = $this.attr('len'),
+		num = $this.attr('num');
+
+	jQuery.ajax({
+		type : 'POST', url : '/templates/protostar/php/mCommentsMore.php', dataType: 'json', 
+		data: { len: len, num: num, table: table },
+		success: function( data ) {
+			$this.attr('len', data.len).attr('num', data.num);
+			if (data.num >= data.len) {
+				$this.addClass('ShliambOff').off('click', moreComments_mc);
+			}
+
+			jQuery.each(data.items, function(ind, val) {
+				var div = '<div class="mcComment mcLevel'+val.level+'" mcid="'+val.id+'" level="'+val.level+'">' +
+							'<div class="mcEmail">'+val.email+'</div>' +
+							'<div class="mcTime">'+val.utime+'</div>' +
+							'<div class="mcMessаge">'+val.message+'</div>' +
+							'<div class="mcAnswer">Ответить</div>' +
+						'</div>',
+					comments = $this.parents('.mComments').find('.mcComments');
+				jQuery(div).appendTo(comments).find('.mcAnswer').on('click', addCommetFloatForm_mc);
+			});
+		}
+	});
 }
 
 function clearString( str ) {
@@ -82,9 +132,7 @@ jQuery(document).ready(function(){
 });
 </script>
 
-
-
- <?php
+<?php
 function mCommetntsInit(){
 	$db = JFactory::getDbo();
 
@@ -128,11 +176,6 @@ function mCommetntsInit(){
 mCommetntsInit();
 ?>
 
-<style>
-	.ShliambOff {
-		display : none;
-	}
-</style>
 
 <?php 
 function getChild(&$arr, $num, $id) {
@@ -179,6 +222,7 @@ function printChild(&$arr, $num, $id) {
 function getComments( $path = null ){
 	$db = JFactory::getDbo();
 	$out = array();
+	$num = 2;
 
 	$path = urldecode((JFactory::getURI())->getPath()); 
 
@@ -188,20 +232,24 @@ function getComments( $path = null ){
 		->where($db->qn('path').' = '.$db->q($path));
 	$from = $db->setQuery($query)
 		->loadResult();
-	echo '<div class="ShliambOff mcTable" table="'.$from.'"></div>';
 
 	$query = $db->getQuery(true)
 		->select('*')
-		->from($from)
+		->from($db->qn($from))
 		->where($db->qn('state').' = 1 AND '.$db->qn('level').' = 0')
 		->order($db->qn('utime').' DESC')
-		->setLimit(20);
+		->setLimit($num);
 	$comments0 = $db->setQuery($query)
 		->loadObjectList();
 
-	if (empty($comments0)) {
-		return 1;
-	}
+	$query = $db->getQuery(true)
+        ->select('COUNT('.$db->qn('id').')')
+        ->from($db->qn($from))
+		->where($db->qn('state').' = 1 AND '.$db->qn('level').' = 0');
+    $db->setQuery($query);   
+	$len = $db->loadResult();
+
+	echo '<div class="ShliambOff mcTable" table="'.$from.'" num="'.count($comments0).'" len="'.$len.'"></div>';
 
 	$query = $db->getQuery(true)
 		->select('*')
@@ -211,6 +259,9 @@ function getComments( $path = null ){
 	$comments = $db->setQuery($query)
 		->loadObjectList();
 
+	if (empty($comments0)) {
+		return 1;
+	}
 
 	$commentsByLevel = array();
 	foreach ($comments as $key => $val) {
@@ -247,6 +298,6 @@ function getComments( $path = null ){
 	<div class="mcComments"><?php
 		getComments();	
 	?></div>
-	<!-- <div class="mcMore"></div> -->
+	<div class="mcMore ShliambOff" len="" num="">Еще</div>
 </div>
 {/source}

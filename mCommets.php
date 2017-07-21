@@ -43,7 +43,7 @@ function printChild(&$arr, $num, $id) {
 function getComments( $path = null ){
 	$db = JFactory::getDbo();
 	$out = array();
-	$num = 20;
+	$num = 2;
 
 	$path = urldecode((JFactory::getURI())->getPath()); 
 
@@ -65,7 +65,8 @@ function getComments( $path = null ){
 
 	$query = $db->getQuery(true)
         ->select('COUNT('.$db->qn('id').')')
-        ->from($db->qn($from));
+        ->from($db->qn($from))
+		->where($db->qn('state').' = 1 AND '.$db->qn('level').' = 0');
     $db->setQuery($query);   
 	$len = $db->loadResult();
 
