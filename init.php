@@ -38,4 +38,6 @@ function mCommetntsInit(){
 			->query();
 	}
 }
+
+mCommetntsInit();
 ?>

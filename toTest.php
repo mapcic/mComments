@@ -2,7 +2,6 @@
 <script type="text/javascript">
 function mComments() {
 	jQuery('.mcButton').on('click', addCommet_mc);
-	// jQuery('.mcMore').on('click', addCommets_mc);
 	jQuery('.mcAnswer').on('click', addCommetFloatForm_mc);
 }
 
@@ -17,8 +16,6 @@ function addCommet_mc(event) {
 		level = comment.attr('level'),
 		email = comment.find('.mcEmail'),
 		msg = comment.find('.mcTextarea');
-
-	console.log(level);
 
 	if ( !isMsg(msg.val()) || !isEmail(email.val()) ) {
 		console.log('empty')

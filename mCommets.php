@@ -63,9 +63,8 @@ function getComments( $path = null ){
 	$comments0 = $db->setQuery($query)
 		->loadObjectList();
 
-	$ids = array();
-	foreach ($comments0 as $key => $val) {
-		$ids[] = $val->id;	
+	if (empty($comments0)) {
+		return 1;
 	}
 
 	$query = $db->getQuery(true)
@@ -76,9 +75,6 @@ function getComments( $path = null ){
 	$comments = $db->setQuery($query)
 		->loadObjectList();
 
-	if (empty($comments)) {
-		return 1;
-	}
 
 	$commentsByLevel = array();
 	foreach ($comments as $key => $val) {
