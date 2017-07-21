@@ -3,7 +3,7 @@
 function mComments() {
 	jQuery('.mcButton').on('click', addCommet_mc);
 	// jQuery('.mcMore').on('click', addCommets_mc);
-	jQuery('.mcAnswer').on('click', addCommetForm_mc);
+	jQuery('.mcAnswer').on('click', addCommetFloatForm_mc);
 }
 
 function addCommet_mc(event) {
@@ -14,9 +14,11 @@ function addCommet_mc(event) {
 		table = mc.find('.mcTable').attr('table'),
 		comment = $this.parents('.mcForm'),
 		parent = comment.attr('mcid'),
-		email = comment.find('.mcEmail'),
 		level = comment.attr('level'),
+		email = comment.find('.mcEmail'),
 		msg = comment.find('.mcTextarea');
+
+	console.log(level);
 
 	if ( !isMsg(msg.val()) || !isEmail(email.val()) ) {
 		console.log('empty')
@@ -27,6 +29,7 @@ function addCommet_mc(event) {
 		type : 'POST', url : '/templates/protostar/php/mCommentsAdd.php', dataType: 'json', 
 		data: { email : email.val(), msg : msg.val(), parent : parent, table: table, level: level },
 		success: function( data ) {
+			console.log(data);
 			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'+data.id+'">' +
 						'<div class="mcEmail">'+data.email+'</div>' +
 						'<div class="mcTime">'+data.utime+'</div>' +
@@ -47,22 +50,18 @@ function addCommet_mc(event) {
 	});
 }
 
-// late
-// function addCommets_mc(event) {
-// 	event.preventDefault();
-// }
-
-function addCommetForm_mc(event) {
+function addCommetFloatForm_mc(event) {
 	event.preventDefault();
 
 	var $this = jQuery(this),
 		mc = $this.parents('.mComments'),
-		comment = $this.parent(),
+		comment = $this.parents('.mcComment'),
 		parent = comment.attr('mcid'),
+		level = comment.attr('level'),
 		floatForm = mc.find('.mcFormFloat');
 
-	comment.insertAfter(floatForm);
-	floatForm.after(comment).attr('mcid', parent).removeClass('ShliambOff');
+	comment.after(floatForm);
+	floatForm.attr('mcid', parent).attr('level', +level+1).removeClass('ShliambOff');
 }
 
 function clearString( str ) {
@@ -192,6 +191,7 @@ function getComments( $path = null ){
 		->where($db->qn('path').' = '.$db->q($path));
 	$from = $db->setQuery($query)
 		->loadResult();
+	echo '<div class="ShliambOff mcTable" table="'.$from.'"></div>';
 
 	$query = $db->getQuery(true)
 		->select('*')
@@ -202,9 +202,8 @@ function getComments( $path = null ){
 	$comments0 = $db->setQuery($query)
 		->loadObjectList();
 
-	$ids = array();
-	foreach ($comments0 as $key => $val) {
-		$ids[] = $val->id;	
+	if (empty($comments0)) {
+		return 1;
 	}
 
 	$query = $db->getQuery(true)
@@ -215,9 +214,6 @@ function getComments( $path = null ){
 	$comments = $db->setQuery($query)
 		->loadObjectList();
 
-	if (empty($comments)) {
-		return 1;
-	}
 
 	$commentsByLevel = array();
 	foreach ($comments as $key => $val) {
@@ -234,7 +230,6 @@ function getComments( $path = null ){
 		echo $out;
 	}
 
-	echo '<div class="ShliambOff mcTable" table="'.$from.'"></div>';
 	return 1;
 }
 ?>

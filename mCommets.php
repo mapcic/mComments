@@ -52,6 +52,7 @@ function getComments( $path = null ){
 		->where($db->qn('path').' = '.$db->q($path));
 	$from = $db->setQuery($query)
 		->loadResult();
+	echo '<div class="ShliambOff mcTable" table="'.$from.'"></div>';
 
 	$query = $db->getQuery(true)
 		->select('*')
@@ -94,7 +95,6 @@ function getComments( $path = null ){
 		echo $out;
 	}
 
-	echo '<div class="ShliambOff mcTable" table="'.$from.'"></div>';
 	return 1;
 }
 ?>
