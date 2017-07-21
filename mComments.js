@@ -4,10 +4,11 @@ function mComments() {
 	jQuery('.mcMore').each(function(ind, val){
 		var $this = jQuery(this),
 			info = jQuery(this).parents('.mComments').find('.mcTable'),
+			table = info.attr('table'),
 			num = info.attr('num'),
 			len = info.attr('len');
 
-		$this.attr('num', num).attr('len', len);
+		$this.attr('num', num).attr('len', len).attr('table', table);
 
 		if ( +num < +len) {
 			$this.removeClass('ShliambOff').off('click', moreComments_mc);
@@ -75,12 +76,13 @@ function moreComments_mc(event) {
 	event.preventDefault();
 
 	var $this = jQuery(this),
+		table = $this.attr('table')
 		len = $this.attr('len'),
 		num = $this.attr('num');
 
 	jQuery.ajax({
 		type : 'POST', url : '/templates/protostar/php/mCommentsMore.php', dataType: 'json', 
-		data: { len: len, num: num },
+		data: { len: len, num: num, table: table },
 		success: function( data ) {
 			$this.attr('len', data.len).attr('num', data.num);
 			if (data.num >= data.len) {
@@ -95,7 +97,7 @@ function moreComments_mc(event) {
 							'<div class="mcAnswer">Ответить</div>' +
 						'</div>',
 					comments = $this.parents('.mComments').find('.mcComments');
-				div.appendTo(comments).find('.mcAnswer').on('click', addCommetFloatForm_mc);
+				jQuery(div).appendTo(comments).find('.mcAnswer').on('click', addCommetFloatForm_mc);
 			});
 		}
 	});

@@ -43,6 +43,7 @@ function printChild(&$arr, $num, $id) {
 function getComments( $path = null ){
 	$db = JFactory::getDbo();
 	$out = array();
+	$num = 20;
 
 	$path = urldecode((JFactory::getURI())->getPath()); 
 
@@ -52,20 +53,23 @@ function getComments( $path = null ){
 		->where($db->qn('path').' = '.$db->q($path));
 	$from = $db->setQuery($query)
 		->loadResult();
-	echo '<div class="ShliambOff mcTable" table="'.$from.'"></div>';
 
 	$query = $db->getQuery(true)
 		->select('*')
-		->from($from)
+		->from($db->qn($from))
 		->where($db->qn('state').' = 1 AND '.$db->qn('level').' = 0')
 		->order($db->qn('utime').' DESC')
-		->setLimit(20);
+		->setLimit($num);
 	$comments0 = $db->setQuery($query)
 		->loadObjectList();
 
-	if (empty($comments0)) {
-		return 1;
-	}
+	$query = $db->getQuery(true)
+        ->select('COUNT('.$db->qn('id').')')
+        ->from($db->qn($from));
+    $db->setQuery($query);   
+	$len = $db->loadResult();
+
+	echo '<div class="ShliambOff mcTable" table="'.$from.'" num="'.count($comments0).'" len="'.$len.'"></div>';
 
 	$query = $db->getQuery(true)
 		->select('*')
@@ -75,6 +79,9 @@ function getComments( $path = null ){
 	$comments = $db->setQuery($query)
 		->loadObjectList();
 
+	if (empty($comments0)) {
+		return 1;
+	}
 
 	$commentsByLevel = array();
 	foreach ($comments as $key => $val) {
