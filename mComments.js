@@ -24,6 +24,7 @@ function addCommet_mc(event) {
 		table = mc.find('.mcTable').attr('table'),
 		comment = $this.parents('.mcForm'),
 		parent = comment.attr('mcid'),
+		branchId = comment.attr('branchId'),
 		level = comment.attr('level'),
 		email = comment.find('.mcEmail'),
 		msg = comment.find('.mcTextarea');
@@ -36,7 +37,7 @@ function addCommet_mc(event) {
 		type : 'POST', url : '/templates/protostar/php/mCommentsAdd.php', dataType: 'json', 
 		data: { email : email.val(), msg : msg.val(), parent : parent, table: table, level: level },
 		success: function( data ) {
-			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'+data.id+'" level="'+data.level+'">' +
+			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'+data.id+'" level="'+data.level+'" branchId="'+ data.branchId +'">'  +
 						'<div class="mcEmail">'+data.email+'</div>' +
 						'<div class="mcTime">'+data.utime+'</div>' +
 						'<div class="mcMessаge">'+data.message+'</div>' +
@@ -47,7 +48,7 @@ function addCommet_mc(event) {
 			
 			email.val('');
 			msg.val('');
-			comment.attr('mcid', 0);
+			comment.attr('mcid', 0).attr('branchId', 0);
 
 			if (comment.hasClass('mcFormFloat')) {
 				comment.addClass('ShliambOff');
@@ -63,11 +64,12 @@ function addCommetFloatForm_mc(event) {
 		mc = $this.parents('.mComments'),
 		comment = $this.parents('.mcComment'),
 		parent = comment.attr('mcid'),
+		branchId = comment.attr('branchId'),
 		level = comment.attr('level'),
 		floatForm = mc.find('.mcFormFloat');
 
 	comment.after(floatForm);
-	floatForm.attr('mcid', parent).attr('level', +level+1).removeClass('ShliambOff');
+	floatForm.attr('mcid', parent).attr('branchId', branchId).attr('level', +level+1).removeClass('ShliambOff');
 }
 
 function moreComments_mc(event) {
@@ -88,7 +90,7 @@ function moreComments_mc(event) {
 			}
 
 			jQuery.each(data.items, function(ind, val) {
-				var div = '<div class="mcComment mcLevel'+val.level+'" mcid="'+val.id+'" level="'+val.level+'">' +
+				var div = '<div class="mcComment mcLevel'+val.level+'" mcid="'+val.id+'" level="'+val.level+'" branchId="'+val.branchId+'">' +
 							'<div class="mcEmail">'+val.email+'</div>' +
 							'<div class="mcTime">'+val.utime+'</div>' +
 							'<div class="mcMessаge">'+val.message+'</div>' +

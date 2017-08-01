@@ -9,6 +9,7 @@ $email = $_POST['email'];
 $level = $_POST['level'];
 $msg = $_POST['msg'];
 $parent = $_POST['parent'];
+$branchId = $_POST['branchId'];
 $table = $_POST['table'];
 
 $db = JFactory::getDbo();
@@ -21,6 +22,7 @@ $comment = (object) array(
 	'email' => $email,
 	'message' => $msg,
 	'parent' => $parent,
+	'branchId' => $branchId,
 	'level' => $level,
 	'utime' => date('U')
 );

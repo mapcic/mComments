@@ -6,6 +6,6 @@ function deleteComment_mc() {
 
 }
 
-function getComments_mc(argument) {
+function getComments_mc (argument) {
 	// body...
 }
