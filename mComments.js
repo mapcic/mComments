@@ -68,6 +68,10 @@ function addCommetFloatForm_mc(event) {
 		level = comment.attr('level'),
 		floatForm = mc.find('.mcFormFloat');
 
+	if (+branchId == 0) {
+		branchId = parent;
+	}
+
 	comment.after(floatForm);
 	floatForm.attr('mcid', parent).attr('branchId', branchId).attr('level', +level+1).removeClass('ShliambOff');
 }
