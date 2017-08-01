@@ -32,6 +32,12 @@ $db->insertObject($table, $comment);
 
 $comment->id = (int)$db->insertid();
 
+$lastComment = (object) array(
+	'mcid' => $comment->id,
+	'table_name' => $table
+);
+$db->insertObject('#__mcomments_last', $lastComment);
+
 echo json_encode($comment);
 return 1;
 ?>
