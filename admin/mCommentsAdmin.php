@@ -12,7 +12,8 @@ function rmComment() {
 }
 
 function getComment() {
-
+	$table;
+	$offset;
+	$
 }
-
 ?>
