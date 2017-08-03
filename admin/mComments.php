@@ -1,8 +1,4 @@
 <?php 
-function mCommentsAdminInit($value='') {
-	mcGetLast();
-}
-
 function addComment() {
 
 }

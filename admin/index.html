@@ -1,6 +1,6 @@
 <div id="mCommentsAdmin">
-	<div id="mcLast">
-		<div class="mcInfo ShliambOff"></div>
+	<div id="mcLast" class="mComments">
+		<div class="mcInfo ShliambOff" offset="0" num="20" table="#__mcomments_last"></div>
 		<div class="mcHead"></div>
 		<div class="mcComments">
 			<div class="mcComment mcLevel0 mcCommentLast" mcid="" branchId="">
@@ -11,9 +11,12 @@
 			</div>
 		</div>
 	</div>
-	<div id="mcPage">
-		<div class="mcInfo ShliambOff"></div>
+	<div id="mcPage" class="mComments">
+		<div class="mcInfo ShliambOff" offset="0" num="20" table=""></div>
 		<div class="mcHead"></div>
+		<div class="mcTables"><select class="mcTables"><?php
+			echo mc_printOptions();
+		?></select></div>
 		<div class="mcComments"></div>
 	</div>	
 </div>
