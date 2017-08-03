@@ -1,3 +1,4 @@
+// fix num + len
 function mComments() {
 	jQuery('.mcButton').on('click', addCommet_mc);
 	jQuery('.mcAnswer').on('click', addCommetFloatForm_mc);
