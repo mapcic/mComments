@@ -43,5 +43,25 @@ function mCommetntsInit(){
 	}
 }
 
-mCommetntsInit();
+function mCommetntsDest() {
+	$db = JFactory::getDbo();
+	$query = $db->getQuery(true)
+		->select($db->qn('table_name'))
+		->from($db->qn('#__mcomments_ids'));
+	$tables = $db->setQuery($query)->loadObjectList();
+
+	foreach ($tables as $key => $val) {
+		$query = 'DROP TABLE '.$db->qn($val->table_name);
+		$db->setQuery($query)->query();
+	}
+
+	$query = 'DROP TABLE '.$db->qn('#__mcomments_ids');
+	$db->setQuery($query)->query();
+
+	$query = 'DROP TABLE '.$db->qn('#__mcomments_last');
+	$db->setQuery($query)->query();
+}
+
+// mCommetntsInit();
+mCommetntsDest();
 ?>

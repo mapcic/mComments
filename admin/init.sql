@@ -25,6 +25,8 @@ CREATE TABLE IF NOT EXISTS `#__mcomments_last` (
 	PRIMARY KEY (`id`)
 );
 
+DROP TABLE `#_mcomments_ids`;
+
 -- Inline
 CREATE TABLE IF NOT EXISTS `#__mcomments_<id>` ( `id` int(11) NOT NULL AUTO_INCREMENT, `email` varchar(255) NOT NULL, `message` mediumtext NOT NULL, `parent` int(11) DEFAULT 0, `branchId` int(11) DEFAULT 0, `utime` int(11) DEFAULT 0, `level` int(11) DEFAULT 0, `state` int(11) DEFAULT 1, PRIMARY KEY (`id`) );
 
