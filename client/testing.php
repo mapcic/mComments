@@ -3,9 +3,22 @@
 	.ShliambOff {
 		display: none;
 	}
+	.mcLevel0 {
+		background-color: green;
+	}
+	.mcLevel1 {
+		background-color: orange;
+	}	
+	.mcLevel2 {
+		background-color: red;
+	}
+	.mcLevel3 {
+		background-color: blue;
+	}
 </style>
 
 <script type="text/javascript">
+// fix num + len
 function mComments() {
 	jQuery('.mcButton').on('click', addCommet_mc);
 	jQuery('.mcAnswer').on('click', addCommetFloatForm_mc);
@@ -32,21 +45,20 @@ function addCommet_mc(event) {
 		table = mc.find('.mcTable').attr('table'),
 		comment = $this.parents('.mcForm'),
 		parent = comment.attr('mcid'),
+		branchId = comment.attr('branchId'),
 		level = comment.attr('level'),
 		email = comment.find('.mcEmail'),
 		msg = comment.find('.mcTextarea');
 
 	if ( !isMsg(msg.val()) || !isEmail(email.val()) ) {
-		console.log('empty')
 		return 0;
 	}
 
 	jQuery.ajax({
 		type : 'POST', url : '/templates/protostar/php/mCommentsAdd.php', dataType: 'json', 
-		data: { email : email.val(), msg : msg.val(), parent : parent, table: table, level: level },
+		data: { email : email.val(), msg : msg.val(), branchId: branchId, parent : parent, table: table, level: level },
 		success: function( data ) {
-			console.log(data);
-			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'+data.id+'" level="'+data.level+'">' +
+			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'+data.id+'" level="'+data.level+'" branchId="'+ data.branchId +'">'  +
 						'<div class="mcEmail">'+data.email+'</div>' +
 						'<div class="mcTime">'+data.utime+'</div>' +
 						'<div class="mcMessаge">'+data.message+'</div>' +
@@ -57,10 +69,15 @@ function addCommet_mc(event) {
 			
 			email.val('');
 			msg.val('');
-			comment.attr('mcid', 0);
+			comment.attr('mcid', 0).attr('branchId', 0);
 
 			if (comment.hasClass('mcFormFloat')) {
 				comment.addClass('ShliambOff');
+			}
+
+			if (data.level == 0) {
+				var more = mc.find('.mcMore');
+				more.attr('len', +more.attr('len')+1);
 			}
 		}
 	});
@@ -73,24 +90,31 @@ function addCommetFloatForm_mc(event) {
 		mc = $this.parents('.mComments'),
 		comment = $this.parents('.mcComment'),
 		parent = comment.attr('mcid'),
+		branchId = comment.attr('branchId'),
 		level = comment.attr('level'),
 		floatForm = mc.find('.mcFormFloat');
 
+	if (+branchId == 0) {
+		branchId = parent;
+	}
+
 	comment.after(floatForm);
-	floatForm.attr('mcid', parent).attr('level', +level+1).removeClass('ShliambOff');
+	floatForm.attr('mcid', parent).attr('branchId', branchId).attr('level', +level+1).removeClass('ShliambOff');
 }
 
 function moreComments_mc(event) {
 	event.preventDefault();
 
 	var $this = jQuery(this),
-		table = $this.attr('table')
+		table = $this.attr('table'),
 		len = $this.attr('len'),
-		num = $this.attr('num');
+		num = $this.attr('num'),
+		offset = +$this.parents('.mComments').find('.mcLevel0').length;
+		console.log(offset);
 
 	jQuery.ajax({
 		type : 'POST', url : '/templates/protostar/php/mCommentsMore.php', dataType: 'json', 
-		data: { len: len, num: num, table: table },
+		data: { len: len, num: offset, table: table },
 		success: function( data ) {
 			$this.attr('len', data.len).attr('num', data.num);
 			if (data.num >= data.len) {
@@ -98,7 +122,7 @@ function moreComments_mc(event) {
 			}
 
 			jQuery.each(data.items, function(ind, val) {
-				var div = '<div class="mcComment mcLevel'+val.level+'" mcid="'+val.id+'" level="'+val.level+'">' +
+				var div = '<div class="mcComment mcLevel'+val.level+'" mcid="'+val.id+'" level="'+val.level+'" branchId="'+val.branchId+'">' +
 							'<div class="mcEmail">'+val.email+'</div>' +
 							'<div class="mcTime">'+val.utime+'</div>' +
 							'<div class="mcMessаge">'+val.message+'</div>' +
@@ -132,51 +156,6 @@ jQuery(document).ready(function(){
 });
 </script>
 
-<?php
-function mCommetntsInit(){
-	$db = JFactory::getDbo();
-
-	$query = $db->getQuery(true)
-		->select(array('id', 'path', 'home'))
-		->from($db->qn('#__menu'))
-		->where($db->qn('published').' = 1 AND '.$db->qn('link').' LIKE "%option=com_content%"');
-	$pages = $db->setQuery($query)
-		->loadObjectList();
-
-	$query = 'CREATE TABLE IF NOT EXISTS `#__mcomments_ids` ( `id` int(11) NOT NULL AUTO_INCREMENT, `home` int(1) DEFAULT 0, `path` varchar(255) NOT NULL, `table_name` varchar(255) NOT NULL, PRIMARY KEY (`id`) );';
-	$db->setQuery($query)
-		->query();
-
-	foreach ($pages as $key => $val) {
-		$page = (object) array(
-			'table_name' => $db->getPrefix().'mcomments_'.$val->id,
-			'path' => '/'.$val->path,
-			'home' => $val->home
-		);
-
-		$query = $db->getQuery('true')
-			->select($db->qn('id'))
-			->from($db->qn('#__mcomments_ids'))
-			->where($db->qn('path').' = "'.$page->path.'"');
-		$resp = $db->setQuery($query)
-			->loadResult();
-
-		if (!empty($resp)) {
-			continue;
-		}
-
-		$db->insertObject('#__mcomments_ids', $page);
-
-		$query = 'CREATE TABLE IF NOT EXISTS `'.$page->table_name.'` ( `id` int(11) NOT NULL AUTO_INCREMENT, `email` varchar(255) NOT NULL, `message` mediumtext NOT NULL, `parent` int(11) DEFAULT 0, `utime` int(11) DEFAULT 0, `level` int(11) DEFAULT 0, `state` int(11) DEFAULT 1, PRIMARY KEY (`id`) );';
-		$db->setQuery($query)
-			->query();
-	}
-}
-
-mCommetntsInit();
-?>
-
-
 <?php 
 function getChild(&$arr, $num, $id) {
 	$out = array();
@@ -209,8 +188,9 @@ function printChild(&$arr, $num, $id) {
 	}
 	
 	foreach ($child as $key => $val) {
-		$out = $out.'<div class="mcComment mcLevel'.$val->level.'" mcid="'.$val->id.'" level="'.$val->level.'">
+		$out = $out.'<div class="mcComment mcLevel'.$val->level.'" mcid="'.$val->id.'" level="'.$val->level.'" branchid="'.$val->branchId.'">
 					<div class="mcEmail">'.$val->email.'</div>
+					<div class="mcTime">'.$val->utime.'</div>
 					<div class="mcMessаge">'.$val->message.'</div>
 					<div class="mcAnswer">Ответить</div>
 				</div>';
@@ -269,8 +249,9 @@ function getComments( $path = null ){
 	}
 
 	foreach ($comments0 as $key => $val) {
-		$out = '<div class="mcComment mcLevel0" mcid="'.$val->id.'" level="0">
+		$out = '<div class="mcComment mcLevel0" mcid="'.$val->id.'" level="0" branchid="'.$val->branchId.'">
 					<div class="mcEmail">'.$val->email.'</div>
+					<div class="mcTime">'.$val->utime.'</div>
 					<div class="mcMessаge">'.$val->message.'</div>
 					<div class="mcAnswer">Ответить</div>
 				</div>';
@@ -282,14 +263,81 @@ function getComments( $path = null ){
 }
 ?>
 
+<?php
+function mCommetntsInit(){
+	$db = JFactory::getDbo();
+
+	$query = $db->getQuery(true)
+		->select(array('id', 'path', 'home'))
+		->from($db->qn('#__menu'))
+		->where($db->qn('published').' = 1 AND '.$db->qn('link').' LIKE "%option=com_content%"');
+	$pages = $db->setQuery($query)
+		->loadObjectList();
+
+	$query = 'CREATE TABLE IF NOT EXISTS `#__mcomments_ids` ( `id` int(11) NOT NULL AUTO_INCREMENT, `home` int(1) DEFAULT 0, `path` varchar(255) NOT NULL, `table_name` varchar(255) NOT NULL, PRIMARY KEY (`id`) );';
+	$db->setQuery($query)
+		->query();
+
+	$query = 'CREATE TABLE IF NOT EXISTS `#__mcomments_last` ( `id` int(11) NOT NULL AUTO_INCREMENT, `mcid` int(11) NOT NULL, `table_name` varchar(255) NOT NULL, PRIMARY KEY (`id`) );';
+	$db->setQuery($query)
+		->query();
+		
+	foreach ($pages as $key => $val) {
+		$page = (object) array(
+			'table_name' => $db->getPrefix().'mcomments_'.$val->id,
+			'path' => '/'.$val->path,
+			'home' => $val->home
+		);
+
+		$query = $db->getQuery('true')
+			->select($db->qn('id'))
+			->from($db->qn('#__mcomments_ids'))
+			->where($db->qn('path').' = "'.$page->path.'"');
+		$resp = $db->setQuery($query)
+			->loadResult();
+
+		if (!empty($resp)) {
+			continue;
+		}
+
+		$db->insertObject('#__mcomments_ids', $page);
+
+		$query = 'CREATE TABLE IF NOT EXISTS `'.$page->table_name.'` ( `id` int(11) NOT NULL AUTO_INCREMENT, `email` varchar(255) NOT NULL, `message` mediumtext NOT NULL, `parent` int(11) DEFAULT 0, `branchId` int(11) DEFAULT 0, `utime` int(11) DEFAULT 0, `level` int(11) DEFAULT 0, `state` int(11) DEFAULT 1, PRIMARY KEY (`id`) );';
+		$db->setQuery($query)
+			->query();
+	}
+}
+
+function mCommetntsDest() {
+	$db = JFactory::getDbo();
+	$query = $db->getQuery(true)
+		->select($db->qn('table_name'))
+		->from($db->qn('#__mcomments_ids'));
+	$tables = $db->setQuery($query)->loadObjectList();
+
+	foreach ($tables as $key => $val) {
+		$query = 'DROP TABLE IF EXISTS '.$db->qn($val->table_name);
+		$db->setQuery($db->replacePrefix($query))->query();
+	}
+
+	$query = 'DROP TABLE IF EXISTS '.$db->replacePrefix($db->qn('#__mcomments_ids'));
+	$db->setQuery($query)->query();
+
+	$query = 'DROP TABLE IF EXISTS '.$db->replacePrefix($db->qn('#__mcomments_last'));
+	$db->setQuery($query)->query();
+}
+
+mCommetntsInit();
+// mCommetntsDest();
+?>
 <div class="mComments">
-	<div class="mcForm" mcid="0" level="0">
+	<div class="mcForm" mcid="0" level="0" branchId="0">
 		<div class="mcFormText">SomeText</div>
 		<input type="text" name="email" class="mcEmail">
 		<textarea class="mcTextarea"></textarea>
 		<div class="mcButton">Отправить</div>
 	</div>
-	<div class="mcForm mcFormFloat ShliambOff" mcid="" level="">
+	<div class="mcForm mcFormFloat ShliambOff" mcid="" level="" branchId="">
 		<div class="mcFormText">SomeText</div>
 		<input type="text" name="email" class="mcEmail">
 		<textarea class="mcTextarea"></textarea>

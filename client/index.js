@@ -36,7 +36,7 @@ function addCommet_mc(event) {
 
 	jQuery.ajax({
 		type : 'POST', url : '/templates/protostar/php/mCommentsAdd.php', dataType: 'json', 
-		data: { email : email.val(), msg : msg.val(), parent : parent, table: table, level: level },
+		data: { email : email.val(), msg : msg.val(), branchId: branchId, parent : parent, table: table, level: level },
 		success: function( data ) {
 			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'+data.id+'" level="'+data.level+'" branchId="'+ data.branchId +'">'  +
 						'<div class="mcEmail">'+data.email+'</div>' +
@@ -81,13 +81,14 @@ function moreComments_mc(event) {
 	event.preventDefault();
 
 	var $this = jQuery(this),
-		table = $this.attr('table')
+		table = $this.attr('table'),
 		len = $this.attr('len'),
-		num = $this.attr('num');
+		num = $this.attr('num'),
+		offset = +$this.parents('.mComments').find('.mcComments .mcLevel0').length - num;
 
 	jQuery.ajax({
 		type : 'POST', url : '/templates/protostar/php/mCommentsMore.php', dataType: 'json', 
-		data: { len: len, num: num, table: table },
+		data: { len: len, num: num + offset, table: table },
 		success: function( data ) {
 			$this.attr('len', data.len).attr('num', data.num);
 			if (data.num >= data.len) {

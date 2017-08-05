@@ -51,17 +51,17 @@ function mCommetntsDest() {
 	$tables = $db->setQuery($query)->loadObjectList();
 
 	foreach ($tables as $key => $val) {
-		$query = 'DROP TABLE '.$db->qn($val->table_name);
-		$db->setQuery($query)->query();
+		$query = 'DROP TABLE IF EXISTS '.$db->qn($val->table_name);
+		$db->setQuery($db->replacePrefix($query))->query();
 	}
 
-	$query = 'DROP TABLE '.$db->qn('#__mcomments_ids');
+	$query = 'DROP TABLE IF EXISTS '.$db->replacePrefix($db->qn('#__mcomments_ids'));
 	$db->setQuery($query)->query();
 
-	$query = 'DROP TABLE '.$db->qn('#__mcomments_last');
+	$query = 'DROP TABLE IF EXISTS '.$db->replacePrefix($db->qn('#__mcomments_last'));
 	$db->setQuery($query)->query();
 }
 
-// mCommetntsInit();
-mCommetntsDest();
+mCommetntsInit();
+// mCommetntsDest();
 ?>
