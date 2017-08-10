@@ -1,4 +1,3 @@
-// fix num + len
 function mComments() {
 	jQuery('.mcButton').on('click', addCommet_mc);
 	jQuery('.mcAnswer').on('click', addCommetFloatForm_mc);
@@ -54,6 +53,11 @@ function addCommet_mc(event) {
 			if (comment.hasClass('mcFormFloat')) {
 				comment.addClass('ShliambOff');
 			}
+
+			if (data.level == 0) {
+				var more = mc.find('.mcMore');
+				more.attr('len', +more.attr('len')+1);
+			}
 		}
 	});
 }
@@ -84,11 +88,12 @@ function moreComments_mc(event) {
 		table = $this.attr('table'),
 		len = $this.attr('len'),
 		num = $this.attr('num'),
-		offset = +$this.parents('.mComments').find('.mcComments .mcLevel0').length - num;
+		offset = +$this.parents('.mComments').find('.mcLevel0').length;
+		console.log(offset);
 
 	jQuery.ajax({
 		type : 'POST', url : '/templates/protostar/php/mCommentsMore.php', dataType: 'json', 
-		data: { len: len, num: num + offset, table: table },
+		data: { len: len, num: offset, table: table },
 		success: function( data ) {
 			$this.attr('len', data.len).attr('num', data.num);
 			if (data.num >= data.len) {
