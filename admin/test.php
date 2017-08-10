@@ -1,6 +1,27 @@
+{source}
+<style>
+	.ShliambOff {
+		display: none;
+	}
+</style>
+<?php 
+function getOptions() {
+	$db = JFactory::getDbo();
+	$query = $db->getQuery(true)
+		->select($db->qn(array('table_name', 'path')))
+		->from($db->qn("#__mcomments_ids"));
+	$options = $db->setQuery($query)->loadObjectList();
+
+	foreach ($options as $val) {
+		$optionsHTML = $optionsHTML.'<option value="'.$val->table_name.'">'.$val->path.'</option>';
+	}
+
+	return $optionsHTML;
+}
+?>
 <div id="mCommentsAdmin">
 	<div id="mcLast" class="mComments">
-		<div class="mcInfo ShliambOff" offset="0" num="3" table="#__mcomments_last"></div>
+		<div class="mcInfo ShliambOff" offset="0" num="20" table="#__mcomments_last"></div>
 		<div class="mcHead"></div>
 		<div class="mcForm" mcid="0" level="0" branchId="0">
 			<div class="mcFormText">SomeText</div>
@@ -44,3 +65,4 @@
 		<div class="mcComments"></div>
 	</div>	
 </div>
+{/source}

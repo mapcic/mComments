@@ -1,19 +1,30 @@
 function mComments() {
-	jQuery('.mcButton').on('click', addCommet_mc);
-	jQuery('.mcAnswer').on('click', addCommetFloatForm_mc);
-	jQuery('.mcMore').each(function(ind, val){
-		var $this = jQuery(this),
-			info = jQuery(this).parents('.mComments').find('.mcInfo'),
-			table = info.attr('table'),
-			num = info.attr('num'),
-			len = info.attr('len');
+	// jQuery('.mcButton').on('click', addCommet_mc);
+	// jQuery('.mcAnswer').on('click', addCommetFloatForm_mc);
+	// jQuery('.mcMore').each(function(ind, val){
+	// 	var $this = jQuery(this),
+	// 		info = jQuery(this).parents('.mComments').find('.mcInfo'),
+	// 		table = info.attr('table'),
+	// 		num = info.attr('num'),
+	// 		len = info.attr('len');
 
-		$this.attr('num', num).attr('len', len).attr('table', table);
+	// 	$this.attr('num', num).attr('len', len).attr('table', table);
 
-		if ( +num < +len) {
-			$this.removeClass('ShliambOff').on('click', moreComments_mc);
-		}
-	});
+	// 	if ( +num < +len) {
+	// 		$this.removeClass('ShliambOff').on('click', moreComments_mc);
+	// 	}
+	// });
+	jQuery('#mcLast .mcMore').on('click', load_mc).trigger('click');
+	jQuery('#mcPage select.mcTables').on('change', changeTable_mc);
+}
+
+function changeTable_mc(event) {
+	event.preventDefault();
+
+	var $this = jQuery(this),
+		selected = $this.val();
+	console.log(selected);
+	console.log(1);
 }
 
 function addCommet_mc(event) {
