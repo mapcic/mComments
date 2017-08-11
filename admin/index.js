@@ -22,9 +22,19 @@ function changeTable_mc(event) {
 	event.preventDefault();
 
 	var $this = jQuery(this),
-		selected = $this.val();
-	console.log(selected);
-	console.log(1);
+		mc = $this.parents('.mComments'),
+		info = mc.find('.mcInfo'),
+		table = $this.val();
+
+	// init mcMore + info
+	jQuery.ajax({
+		type: 'POST', url : '/templates/protostar/php/mCommentsAdmin.php', dataType: 'json', 
+		data: { table: table, method: 'info'},
+		success: function(data) {
+			info.attr('len', data.len).attr('num', data.num).attr('offset', data.offset);
+			mc.find('.mcMore').removeClass('ShliambOff').trigger('click');
+		}
+	});
 }
 
 function addCommet_mc(event) {
