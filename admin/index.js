@@ -1,20 +1,5 @@
 function mComments() {
-	// jQuery('.mcButton').on('click', addCommet_mc);
-	// jQuery('.mcAnswer').on('click', addCommetFloatForm_mc);
-	// jQuery('.mcMore').each(function(ind, val){
-	// 	var $this = jQuery(this),
-	// 		info = jQuery(this).parents('.mComments').find('.mcInfo'),
-	// 		table = info.attr('table'),
-	// 		num = info.attr('num'),
-	// 		len = info.attr('len');
-
-	// 	$this.attr('num', num).attr('len', len).attr('table', table);
-
-	// 	if ( +num < +len) {
-	// 		$this.removeClass('ShliambOff').on('click', moreComments_mc);
-	// 	}
-	// });
-	jQuery('#mcLast .mcMore').on('click', load_mc).trigger('click');
+	jQuery('#mcLast .mcMore').on('click', loadComments_mc).trigger('click');
 	jQuery('#mcPage select.mcTables').on('change', changeTable_mc);
 }
 
@@ -23,18 +8,73 @@ function changeTable_mc(event) {
 
 	var $this = jQuery(this),
 		mc = $this.parents('.mComments'),
-		info = mc.find('.mcInfo'),
-		table = $this.val();
+		info = mc.find('.mcInfo');
 
-	// init mcMore + info
 	jQuery.ajax({
 		type: 'POST', url : '/templates/protostar/php/mCommentsAdmin.php', dataType: 'json', 
-		data: { table: table, method: 'info'},
+		data: { table: $this.val(),
+				method: 'info'},
 		success: function(data) {
 			info.attr('len', data.len).attr('num', data.num).attr('offset', data.offset);
+			mc.find('.mcComments').empty();
 			mc.find('.mcMore').removeClass('ShliambOff').trigger('click');
 		}
 	});
+}
+
+function loadComments_mc(event) {
+	event.preventDefault();
+
+	var $this = jQuery(this),
+		node = $this.parents('.mComments'),
+		info = node.find('.mcInfo');
+
+	jQuery.ajax(
+		type : 'POST', url : '/templates/protostar/php/mCommentsAdmin.php', dataType: 'json', 
+		data: { offset: node.find('.mcLevel0').length,
+				num: info.attr('num'), 
+				table: info.attr('table'), 
+				method: 'load' },
+		success: function(data) {
+			var comments = node.find('.mcComments');
+			jQuery.each(data.items, function(ind, val) {
+				var div = '<div class="mcComment mcLevel'+val.level+'" mcid="'+val.id+'" level="'+val.level+'" branchId="'+val.branchId+'">' +
+							'<div class="mcEmail">'+val.email+'</div>' +
+							'<div class="mcTime">'+val.utime+'</div>' +
+							'<div class="mcMessаge">'+val.message+'</div>' +
+							'<div class="mcAnswer">Ответить</div>' +
+						'</div>',
+				jQuery(div).appendTo(comments).find('.mcAnswer').on('click', addCommetFloatForm_mc);
+			});
+
+			if ( +info.attr('len') == comments.find('.mcLevel0').length ) {
+				$this.addClass('ShliambOff').off('click', loadComments_mc);
+			}
+
+		}
+	);
+}
+
+function removeComment_mc( event ) {
+	event.preventDefault();
+
+	var $this = jQuery(this),
+		comments = $this.parents('.mcComment .mcLevel0'),
+		info = $this.parents('.mComments').find('.mcInfo');
+	jQuery.ajax(
+		type : 'POST', url : '/templates/protostar/php/mCommentsAdmin.php', dataType: 'json', 
+		data: { id : comment.attr('mcid'),
+				branchId: comment.attr('branchId'),
+				table: info.attr('table'),
+				method: 'remove' },
+		success: function(data) {
+			info.attr('len', +info.attr('len') - data.num);
+			data.ids = data.ids.map(function(val, ind) {
+				return '[mcid="'+ val +'"]';
+			}).join();
+			comments.filter(data.ids).remove();
+		}
+	);
 }
 
 function addCommet_mc(event) {
@@ -43,11 +83,7 @@ function addCommet_mc(event) {
 	var $this = jQuery(this),
 		mc = $this.parents('.mComments'),
 		info = mc.find('.mcInfo'),
-		table = info.attr('table'),
 		comment = $this.parents('.mcForm'),
-		parent = comment.attr('mcid'),
-		branchId = comment.attr('branchId'),
-		level = comment.attr('level'),
 		email = comment.find('.mcEmail'),
 		msg = comment.find('.mcTextarea');
 
@@ -57,7 +93,12 @@ function addCommet_mc(event) {
 
 	jQuery.ajax({
 		type : 'POST', url : '/templates/protostar/php/mCommentsAdd.php', dataType: 'json', 
-		data: { email : email.val(), msg : msg.val(), branchId: branchId, parent : parent, table: table, level: level },
+		data: { email : email.val(),
+				msg : msg.val(), 
+				branchId: comment.attr('branchId'),
+				parentId : comment.attr('mcid'), 
+				table: info.attr('table'), 
+				level: comment.attr('level')},
 		success: function( data ) {
 			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'+data.id+'" level="'+data.level+'" branchId="'+ data.branchId +'">'  +
 						'<div class="mcEmail">'+data.email+'</div>' +
@@ -66,8 +107,7 @@ function addCommet_mc(event) {
 						'<div class="mcAnswer">Ответить</div>' +
 					'</div>';
 			
-			jQuery(div).insertAfter(comment);
-			
+			mc.find('.mcComments').pretend(div);
 			email.val('');
 			msg.val('');
 			comment.attr('mcid', 0).attr('branchId', 0);
@@ -77,8 +117,7 @@ function addCommet_mc(event) {
 			}
 
 			if (data.level == 0) {
-				var more = mc.find('.mcMore');
-				more.attr('len', +more.attr('len')+1);
+				info.attr('len', +info.attr('len') + 1);
 			}
 		}
 	});
@@ -88,66 +127,20 @@ function addCommetFloatForm_mc(event) {
 	event.preventDefault();
 
 	var $this = jQuery(this),
-		mc = $this.parents('.mComments'),
 		comment = $this.parents('.mcComment'),
-		parent = comment.attr('mcid'),
+		parentId = comment.attr('mcid'),
 		branchId = comment.attr('branchId'),
-		level = comment.attr('level'),
 		floatForm = mc.find('.mcFormFloat');
 
 	if (+branchId == 0) {
-		branchId = parent;
+		branchId = parentId;
 	}
 
 	comment.after(floatForm);
-	floatForm.attr('mcid', parent).attr('branchId', branchId).attr('level', +level+1).removeClass('ShliambOff');
-}
-
-
-function load_mc(event) {
-	event.preventDefault();
-
-	var $this = jQuery(this),
-		node = $this.parents('.mComments'),
-		info = node.find('.mcInfo');
-
-	jQuery.ajax(
-		type : 'POST', url : '/templates/protostar/php/mCommentsAdmin.php', dataType: 'json', 
-		data: { offset: info.attr('offset'), num: info.attr('num'), table: info.attr('table'), method: 'get' },
-		success: function(data) {
-			// info.attr('offset', data.offset).attr('len', data.len);
-			if (data.offset >= data.len) {
-				$this.addClass('ShliambOff').off('click', load_mc);
-			}
-
-			jQuery.each(data.items, function(ind, val) {
-				var div = '<div class="mcComment mcLevel'+val.level+'" mcid="'+val.id+'" level="'+val.level+'" branchId="'+val.branchId+'">' +
-							'<div class="mcEmail">'+val.email+'</div>' +
-							'<div class="mcTime">'+val.utime+'</div>' +
-							'<div class="mcMessаge">'+val.message+'</div>' +
-							'<div class="mcAnswer">Ответить</div>' +
-						'</div>',
-					comments = node.find('.mcComments');
-				jQuery(div).appendTo(comments).find('.mcAnswer').on('click', answer_mc);
-			});
-		}
-	);
-}
-
-function remove_mc( event ) {
-	event.preventDefault();
-
-	var $this = jQuery(this),
-		comment = $this.parent(),
-		info = $this.parents('.mComments').find('.mcInfo');
-	jQuery.ajax(
-		type : 'POST', url : '/templates/protostar/php/mCommentsAdmin.php', dataType: 'json', 
-		data: { id : comment.attr('mcid'), table: info.attr('table'), method: 'remove' },
-		success: function(data) {
-			info.attr('offset', +info.attr('offset')-1).attr('len', +info.attr('len')-1);
-			comment.remove();
-		}
-	);
+	floatForm.attr('mcid', parentId)
+		.attr('branchId', branchId)
+		.attr('level', +comment.attr('level')+1)
+		.removeClass('ShliambOff');
 }
 
 function clearString( str ) {

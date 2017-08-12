@@ -34,11 +34,7 @@ function sortComment( &$comments ) {
 	return $out;
 }
 
-function get() {
-	$table = $_POST['table'];
-	$num = $_POST['num'];
-	$offset = $_POST['offset'];
-
+function loadLast($table, $offset, $num) {
 	$db = JFactory::getDbo();
 	$query = $db->getQuery(true)
 		->select('*')
@@ -68,11 +64,117 @@ function get() {
 		$branchs[] = $comments;
 	}
 
-	echo $branchs;
+	return $branchs;
+}
+
+function loadPage($table, $offset, $num) {
+	$db = JFactory::getDbo();
+	$query = $db->getQuery(true)
+		->select('*')
+		->from($db->qn($table))
+		->where($db->qn('level').' = 0')
+		->setLimit($num, $offset);
+	$level0 = $db->setQuery($query)->loadObjectList();
+
+	$branchs = [];
+	foreach ($level0 as $key => $val) {
+		$query = $db->getQuery(true)
+			->select('*')
+			->from($table)
+			->where($db->qn('branchId').' = '.$val->id);
+		$comments = $db->setQuery($query)->loadObjectList();
+		$comments = sortComment($comments);
+
+		$branchs[] = $comments;
+	}
+
+	return $branchs;
+}
+
+function load() {
+	$table = $_POST['table'];
+	$num = $_POST['num'];
+	$offset = $_POST['offset'];
+
+	if ($table == '#__mcomments_last') {
+		$comments = loadLast($table, $offset, $num);
+	} else {
+		$comments = loadPage($table, $offset, $num);
+	}
+
+	$out = array(
+		'comments' => $comments
+	);
+
+	echo(json_encode($out));
+}
+
+function remove() {
+	$table = $_POST['table'];
+	$id = $_POST['id'];
+	$branchId = $_POST['branchId'];
+
+	$db = JFactory::getDbo();
+	if ($table == '#__mcomments_last') {
+		$query = $db->getQuery(true)
+			->select($db->qn('table_name'))
+			->from($db->qn($table));
+		$tablePage = $db->setQuery($query)->loadResult();
+	} else {
+		$tablePage = $table;
+	}
+
+	$subQuery = $db->getQuery(true)
+			->select($db->qn('level'))
+			->from($db->qn($tablePage))
+			->where($db->qn('id').' = '.$id);
+	$query = $db->getQuery(true)
+		->select('*')
+		->from($db->qn($table))
+		->where($db->qn('branchId').' = '.$branchId
+			.' AND '.
+			$db->qn('level').' > ('.$subQuery.')');
+	$branch = $db->setQuery($query)->loadObjectList();
+
+	$query = $db->getQuery(true)
+		->select('*')
+		->from($db->qn($tablePage))
+		->where($db->qn('id').' = '.$id);
+	$root = $db->setQuery($query)->loadObjectList();
+
+	$num = 0;
+	if ($root->level == 0) {
+		$num = 1;
+	}
+
+	$branch = array_merge($root, $branch);
+	$branch = sortComment($branch);
+
+	ids = [];
+	foreach ($branch as $key => $val) {
+		$ids[] = $val->id;
+	}
+
+	$query = $db->getQuery(true)
+		->delete($db->qn($tablePage))
+		->where($db->qn('id').' IN ('.implode(',', ids));
+	$db->setQuery($query)->execute();
+
+	$query = $db->getQuery(true)
+		->delete($db->qn('#__mcomments_last'))
+		->where($db->qn('id').' IN ('.implode(',', ids));
+	$db->setQuery($query)->execute();
+
+	$out = array(
+		'ids' => $ids,
+		'num' => $num
+	);
+
+	echo(json_encode($out));
 }
 
 $nameFunc = json_decode( $_POST[ 'params' ] )->method;
-if ($nameFunc in array('get')) {
+if ($nameFunc in array('load', 'info', 'remove')) {
 	initJoomlaApi();
 	$nameFunc();
 }

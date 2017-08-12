@@ -31,6 +31,10 @@ $id = 0;
 $db->insertObject($table, $comment);
 
 $comment->id = (int)$db->insertid();
+if ($comment->level == 0) {
+	$comment->branchId = $comment->id;
+	$db->insertObject($table, $comment, 'id');
+}
 
 $lastComment = (object) array(
 	'mcid' => $comment->id,
