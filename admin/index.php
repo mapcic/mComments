@@ -150,7 +150,7 @@ function remove() {
 	$branch = array_merge($root, $branch);
 	$branch = sortComment($branch);
 
-	ids = [];
+	$ids = [];
 	foreach ($branch as $key => $val) {
 		$ids[] = $val->id;
 	}
@@ -174,7 +174,7 @@ function remove() {
 }
 
 $nameFunc = json_decode( $_POST[ 'params' ] )->method;
-if ($nameFunc in array('load', 'info', 'remove')) {
+if ( in_array($nameFunc, array('load', 'info', 'remove')) ) {
 	initJoomlaApi();
 	$nameFunc();
 }

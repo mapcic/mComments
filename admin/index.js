@@ -17,7 +17,8 @@ function changeTable_mc(event) {
 		success: function(data) {
 			info.attr('len', data.len).attr('num', data.num).attr('offset', data.offset);
 			mc.find('.mcComments').empty();
-			mc.find('.mcMore').removeClass('ShliambOff').trigger('click');
+			// mc.find('.mcMore').removeClass('ShliambOff').trigger('click');
+			mc.find('.mcMore').removeClass('ShliambOff');
 		}
 	});
 }
@@ -29,10 +30,10 @@ function loadComments_mc(event) {
 		node = $this.parents('.mComments'),
 		info = node.find('.mcInfo');
 
-	jQuery.ajax(
+	jQuery.ajax({
 		type : 'POST', url : '/templates/protostar/php/mCommentsAdmin.php', dataType: 'json', 
 		data: { offset: node.find('.mcLevel0').length,
-				num: info.attr('num'), 
+				num: info.attr('num'),
 				table: info.attr('table'), 
 				method: 'load' },
 		success: function(data) {
@@ -43,7 +44,7 @@ function loadComments_mc(event) {
 							'<div class="mcTime">'+val.utime+'</div>' +
 							'<div class="mcMessаge">'+val.message+'</div>' +
 							'<div class="mcAnswer">Ответить</div>' +
-						'</div>',
+						'</div>';
 				jQuery(div).appendTo(comments).find('.mcAnswer').on('click', addCommetFloatForm_mc);
 			});
 
@@ -52,7 +53,7 @@ function loadComments_mc(event) {
 			}
 
 		}
-	);
+	});
 }
 
 function removeComment_mc( event ) {
@@ -61,7 +62,7 @@ function removeComment_mc( event ) {
 	var $this = jQuery(this),
 		comments = $this.parents('.mcComment .mcLevel0'),
 		info = $this.parents('.mComments').find('.mcInfo');
-	jQuery.ajax(
+	jQuery.ajax({
 		type : 'POST', url : '/templates/protostar/php/mCommentsAdmin.php', dataType: 'json', 
 		data: { id : comment.attr('mcid'),
 				branchId: comment.attr('branchId'),
@@ -74,7 +75,7 @@ function removeComment_mc( event ) {
 			}).join();
 			comments.filter(data.ids).remove();
 		}
-	);
+	});
 }
 
 function addCommet_mc(event) {
