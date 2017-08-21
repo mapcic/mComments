@@ -8,14 +8,15 @@ function changeTable_mc(event) {
 
 	var $this = jQuery(this),
 		mc = $this.parents('.mComments'),
-		info = mc.find('.mcInfo');
+		info = mc.find('.mcInfo'),
+		num = 5;
 
 	jQuery.ajax({
 		type: 'POST', url : '/templates/protostar/php/mCommentsAdmin.php', dataType: 'json', 
 		data: { table: $this.val(),
 				method: 'info'},
 		success: function(data) {
-			info.attr('len', data.len).attr('num', data.num).attr('offset', data.offset);
+			info.attr('len', data.len).attr('num', num).attr('offset', 0);
 			mc.find('.mcComments').empty();
 			// mc.find('.mcMore').removeClass('ShliambOff').trigger('click');
 			mc.find('.mcMore').removeClass('ShliambOff');

@@ -5,18 +5,21 @@
 	}
 	.mcLevel0 {
 		background-color: green;
+		margin-top: 5px;
 	}
 	.mcLevel1 {
 		background-color: orange;
+		margin-left: 5px;
 	}	
 	.mcLevel2 {
 		background-color: red;
+		margin-left: 10px;
 	}
 	.mcLevel3 {
 		background-color: blue;
+		margin-left: 15px;
 	}
 </style>
-
 <script type="text/javascript">
 // fix num + len
 function mComments() {

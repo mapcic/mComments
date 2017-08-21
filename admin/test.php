@@ -1,14 +1,32 @@
 {source}
-<style>
+<style type="text/css">
 	.ShliambOff {
 		display: none;
+	}
+	.mcLevel0 {
+		background-color: green;
+		margin-top: 5px;
+	}
+	.mcLevel1 {
+		background-color: orange;
+		margin-left: 20px;
+	}	
+	.mcLevel2 {
+		background-color: red;
+		margin-left: 40px;
+	}
+	.mcLevel3 {
+		background-color: blue;
+		margin-left: 60px;
 	}
 </style>
 
 <script type="text/javascript">
 function mComments() {
-	jQuery('#mcLast .mcMore').on('click', loadComments_mc).trigger('click');
+	// jQuery('#mcLast .mcMore').on('click', loadComments_mc).trigger('click');
 	jQuery('#mcPage select.mcTables').on('change', changeTable_mc);
+	jQuery('.mcMore').on('click', loadComments_mc);
+	jQuery('.mcButton').on('click', addCommet_mc);
 }
 
 function changeTable_mc(event) {
@@ -16,17 +34,18 @@ function changeTable_mc(event) {
 
 	var $this = jQuery(this),
 		mc = $this.parents('.mComments'),
-		info = mc.find('.mcInfo');
+		info = mc.find('.mcInfo'),
+		talbe = $this.val(),
+		num = 5;
 
 	jQuery.ajax({
 		type: 'POST', url : '/templates/protostar/php/mCommentsAdmin.php', dataType: 'json', 
-		data: { table: $this.val(),
+		data: { table: talbe,
 				method: 'info'},
 		success: function(data) {
-			info.attr('len', data.len).attr('num', data.num).attr('offset', data.offset);
+			info.attr('len', data.len).attr('num', num).attr('offset', 0).attr('table', talbe);
 			mc.find('.mcComments').empty();
-			// mc.find('.mcMore').removeClass('ShliambOff').trigger('click');
-			mc.find('.mcMore').removeClass('ShliambOff');
+			mc.find('.mcMore').removeClass('ShliambOff').trigger('click');
 		}
 	});
 }
@@ -47,17 +66,21 @@ function loadComments_mc(event) {
 		success: function(data) {
 			var comments = node.find('.mcComments');
 			jQuery.each(data.items, function(ind, val) {
+				console.log(val);
 				var div = '<div class="mcComment mcLevel'+val.level+'" mcid="'+val.id+'" level="'+val.level+'" branchId="'+val.branchId+'">' +
 							'<div class="mcEmail">'+val.email+'</div>' +
 							'<div class="mcTime">'+val.utime+'</div>' +
 							'<div class="mcMessаge">'+val.message+'</div>' +
+							'<div class="mcRemove">Удалить</div>' +
 							'<div class="mcAnswer">Ответить</div>' +
 						'</div>';
-				jQuery(div).appendTo(comments).find('.mcAnswer').on('click', addCommetFloatForm_mc);
+				jQuery(div).appendTo(comments);
 			});
+			node.find('.mcAnswer').off('click', addCommetFloatForm_mc).on('click', addCommetFloatForm_mc);
 
 			if ( +info.attr('len') == comments.find('.mcLevel0').length ) {
-				$this.addClass('ShliambOff').off('click', loadComments_mc);
+				// $this.addClass('ShliambOff').off('click', loadComments_mc);
+				$this.addClass('ShliambOff');
 			}
 
 		}
@@ -107,12 +130,14 @@ function addCommet_mc(event) {
 				branchId: comment.attr('branchId'),
 				parentId : comment.attr('mcid'), 
 				table: info.attr('table'), 
-				level: comment.attr('level')},
+				level: comment.attr('level'),
+				method: 'add'},
 		success: function( data ) {
 			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'+data.id+'" level="'+data.level+'" branchId="'+ data.branchId +'">'  +
 						'<div class="mcEmail">'+data.email+'</div>' +
 						'<div class="mcTime">'+data.utime+'</div>' +
 						'<div class="mcMessаge">'+data.message+'</div>' +
+						'<div class="mcRemove">Удалить</div>' +
 						'<div class="mcAnswer">Ответить</div>' +
 					'</div>';
 			
@@ -136,6 +161,7 @@ function addCommetFloatForm_mc(event) {
 	event.preventDefault();
 
 	var $this = jQuery(this),
+		mc = $this.parents('.mComments'),
 		comment = $this.parents('.mcComment'),
 		parentId = comment.attr('mcid'),
 		branchId = comment.attr('branchId'),
@@ -190,7 +216,7 @@ function getOptions() {
 ?>
 <div id="mCommentsAdmin">
 	<div id="mcLast" class="mComments">
-		<div class="mcInfo ShliambOff" offset="0" num="20" table="#__mcomments_last"></div>
+		<div class="mcInfo ShliambOff" offset="0" num="5" table="#__mcomments_last"></div>
 		<div class="mcHead"></div>
 		<div class="mcForm" mcid="0" level="0" branchId="0">
 			<div class="mcFormText">SomeText</div>
@@ -205,16 +231,11 @@ function getOptions() {
 			<div class="mcButton">Отправить</div>
 		</div>
 		<div class="mcComments">
-			<div class="mcComment mcLevel0 mcCommentLast" mcid="" branchId="">
-				<div class="mcEmail"></div>
-				<div class="mcTime"></div>
-				<div class="mcMessаge"></div>
-				<div class="mcAnswer">Ответить</div>
-			</div>
 		</div>
+		<div class="mcMore ShliambOff">Еще</div>
 	</div>
 	<div id="mcPage" class="mComments">
-		<div class="mcInfo ShliambOff" offset="0" num="20" table=""></div>
+		<div class="mcInfo ShliambOff" offset="0" num="5" table=""></div>
 		<div class="mcHead"></div>
 		<div class="mcTables"><select class="mcTables"><?php
 			echo getOptions();
@@ -232,6 +253,7 @@ function getOptions() {
 			<div class="mcButton">Отправить</div>
 		</div>
 		<div class="mcComments"></div>
+		<div class="mcMore ShliambOff">Еще</div>
 	</div>	
 </div>
 {/source}

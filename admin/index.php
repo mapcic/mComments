@@ -1,13 +1,4 @@
 <?php
-function initJoomlaApi() {
-	define('_JEXEC', 1); define('DS', DIRECTORY_SEPARATOR);
-	define('JPATH_BASE', preg_replace('/(?:\/[\w\-]+){3}$/', '', dirname(__FILE__)));
-
-	require_once (JPATH_BASE .DS.'includes'.DS.'defines.php');
-	require_once (JPATH_BASE .DS.'includes'.DS.'framework.php');
-
-	return 1;
-}
 
 function getChild($comments, $level, $parentId){
 	$out = [];
@@ -61,7 +52,7 @@ function loadLast($table, $offset, $num) {
 		$comments = $db->setQuery($query)->loadObjectList();
 		$comments = sortComment($comments);
 
-		$branchs[] = $comments;
+		$branchs = array_merge($branchs, $comments);
 	}
 
 	return $branchs;
@@ -73,6 +64,7 @@ function loadPage($table, $offset, $num) {
 		->select('*')
 		->from($db->qn($table))
 		->where($db->qn('level').' = 0')
+		->order($db->qn('utime').' DESC, '.$db->qn('id').' DESC')
 		->setLimit($num, $offset);
 	$level0 = $db->setQuery($query)->loadObjectList();
 
@@ -85,7 +77,7 @@ function loadPage($table, $offset, $num) {
 		$comments = $db->setQuery($query)->loadObjectList();
 		$comments = sortComment($comments);
 
-		$branchs[] = $comments;
+		$branchs = array_merge($branchs, $comments);
 	}
 
 	return $branchs;
@@ -95,6 +87,7 @@ function load() {
 	$table = $_POST['table'];
 	$num = $_POST['num'];
 	$offset = $_POST['offset'];
+	$comments = '';
 
 	if ($table == '#__mcomments_last') {
 		$comments = loadLast($table, $offset, $num);
@@ -103,7 +96,7 @@ function load() {
 	}
 
 	$out = array(
-		'comments' => $comments
+		'items' => $comments
 	);
 
 	echo(json_encode($out));
@@ -173,7 +166,75 @@ function remove() {
 	echo(json_encode($out));
 }
 
-$nameFunc = json_decode( $_POST[ 'params' ] )->method;
+function info() {
+	$table = $_POST['table'];
+
+	$db = JFactory::getDbo();
+	$query = $db->getQuery(true)
+		->select('COUNT('.$db->quoteName('id').')')
+		->where($db->qn('level').' = 0')
+		->from($db->qn($table));
+	$len = $db->setQuery($query)->loadResult();
+
+	$out = array(
+		'len' => $len
+	);
+
+	echo(json_encode($out)); 
+}
+
+function add() {
+	$email = $_POST['email'];
+	$level = $_POST['level'];
+	$msg = $_POST['msg'];
+	$parent = $_POST['parentId'];
+	$branchId = $_POST['branchId'];
+	$table = $_POST['table'];
+
+	$db = JFactory::getDbo();
+
+	if ( !preg_match('/'.$db->getPrefix().'mcomments_.+/', $table) ) {
+		return 0;
+	}
+
+	$comment = (object) array(
+		'email' => $email,
+		'message' => $msg,
+		'parent' => $parent,
+		'branchId' => $branchId,
+		'level' => $level,
+		'utime' => date('U')
+	);
+
+	$id = 0;
+	$db->insertObject($table, $comment);
+
+	$comment->id = (int)$db->insertid();
+	if ($comment->level == 0) {
+		$comment->branchId = $comment->id;
+		$db->insertObject($table, $comment, 'id');
+	}
+
+	$lastComment = (object) array(
+		'mcid' => $comment->id,
+		'table_name' => $table
+	);
+	$db->insertObject('#__mcomments_last', $lastComment);
+
+	echo json_encode($comment);
+}
+
+function initJoomlaApi() {
+	define('_JEXEC', 1); define('DS', DIRECTORY_SEPARATOR);
+	define('JPATH_BASE', preg_replace('/(?:\/[\w\-]+){3}$/', '', dirname(__FILE__)));
+
+	require_once (JPATH_BASE .DS.'includes'.DS.'defines.php');
+	require_once (JPATH_BASE .DS.'includes'.DS.'framework.php');
+
+	return 1;
+}
+
+$nameFunc = $_POST['method' ];
 if ( in_array($nameFunc, array('load', 'info', 'remove')) ) {
 	initJoomlaApi();
 	$nameFunc();
