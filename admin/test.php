@@ -124,7 +124,7 @@ function addCommet_mc(event) {
 	}
 
 	jQuery.ajax({
-		type : 'POST', url : '/templates/protostar/php/mCommentsAdd.php', dataType: 'json', 
+		type : 'POST', url : '/templates/protostar/php/mCommentsAdmin.php', dataType: 'json', 
 		data: { email : email.val(),
 				msg : msg.val(), 
 				branchId: comment.attr('branchId'),
@@ -133,6 +133,7 @@ function addCommet_mc(event) {
 				level: comment.attr('level'),
 				method: 'add'},
 		success: function( data ) {
+			console.log(data);
 			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'+data.id+'" level="'+data.level+'" branchId="'+ data.branchId +'">'  +
 						'<div class="mcEmail">'+data.email+'</div>' +
 						'<div class="mcTime">'+data.utime+'</div>' +
@@ -141,7 +142,7 @@ function addCommet_mc(event) {
 						'<div class="mcAnswer">Ответить</div>' +
 					'</div>';
 			
-			mc.find('.mcComments').pretend(div);
+			mc.find('.mcComments').prepend(div);
 			email.val('');
 			msg.val('');
 			comment.attr('mcid', 0).attr('branchId', 0);

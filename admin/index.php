@@ -212,7 +212,7 @@ function add() {
 	$comment->id = (int)$db->insertid();
 	if ($comment->level == 0) {
 		$comment->branchId = $comment->id;
-		$db->insertObject($table, $comment, 'id');
+		$db->updateObject($table, $comment, 'id');
 	}
 
 	$lastComment = (object) array(
@@ -235,7 +235,7 @@ function initJoomlaApi() {
 }
 
 $nameFunc = $_POST['method' ];
-if ( in_array($nameFunc, array('load', 'info', 'remove')) ) {
+if ( in_array($nameFunc, array('load', 'info', 'remove', 'add')) ) {
 	initJoomlaApi();
 	$nameFunc();
 }
