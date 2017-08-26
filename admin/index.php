@@ -19,8 +19,12 @@ function sortComment( &$comments ) {
 	foreach ($comments as $key => $val) {
 		$commentsByLevel[$val->level][] = $val;	
 	}
+	
+	$levels = array_keys($commentsByLevel);
+	$startLevel = min($levels);
+	$parent = $commentsByLevel[$startLevel][0]->parent;
 
-	$out = getChild($commentsByLevel, 0, 0);
+	$out = getChild($commentsByLevel, $startLevel, $parent);
 
 	return $out;
 }
@@ -123,7 +127,7 @@ function remove() {
 			->where($db->qn('id').' = '.$id);
 	$query = $db->getQuery(true)
 		->select('*')
-		->from($db->qn($table))
+		->from($db->qn($tablePage))
 		->where($db->qn('branchId').' = '.$branchId
 			.' AND '.
 			$db->qn('level').' > ('.$subQuery.')');
@@ -135,11 +139,8 @@ function remove() {
 		->where($db->qn('id').' = '.$id);
 	$root = $db->setQuery($query)->loadObjectList();
 
-	$num = 0;
-	if ($root->level == 0) {
-		$num = 1;
-	}
-
+	$num = ($root->level == 0)? 1 : 0;
+	
 	$branch = array_merge($root, $branch);
 	$branch = sortComment($branch);
 
@@ -150,12 +151,17 @@ function remove() {
 
 	$query = $db->getQuery(true)
 		->delete($db->qn($tablePage))
-		->where($db->qn('id').' IN ('.implode(',', ids));
+		->where(array(
+			$db->qn('id').' IN ('.implode(',', $ids).')'
+		));
 	$db->setQuery($query)->execute();
 
 	$query = $db->getQuery(true)
 		->delete($db->qn('#__mcomments_last'))
-		->where($db->qn('id').' IN ('.implode(',', ids));
+		->where(array(
+			$db->qn('mcid').' IN ('.implode(',', $ids).')',
+			$db->qn('table_name').' = '.$db->q($tablePage)
+		));
 	$db->setQuery($query)->execute();
 
 	$out = array(

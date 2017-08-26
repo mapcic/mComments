@@ -66,7 +66,6 @@ function loadComments_mc(event) {
 		success: function(data) {
 			var comments = node.find('.mcComments');
 			jQuery.each(data.items, function(ind, val) {
-				console.log(val);
 				var div = '<div class="mcComment mcLevel'+val.level+'" mcid="'+val.id+'" level="'+val.level+'" branchId="'+val.branchId+'">' +
 							'<div class="mcEmail">'+val.email+'</div>' +
 							'<div class="mcTime">'+val.utime+'</div>' +
@@ -77,6 +76,7 @@ function loadComments_mc(event) {
 				jQuery(div).appendTo(comments);
 			});
 			node.find('.mcAnswer').off('click', addCommetFloatForm_mc).on('click', addCommetFloatForm_mc);
+			node.find('.mcRemove').off('click', removeComment_mc).on('click', removeComment_mc);
 
 			if ( +info.attr('len') == comments.find('.mcLevel0').length ) {
 				// $this.addClass('ShliambOff').off('click', loadComments_mc);
@@ -91,7 +91,8 @@ function removeComment_mc( event ) {
 	event.preventDefault();
 
 	var $this = jQuery(this),
-		comments = $this.parents('.mcComment .mcLevel0'),
+		comment = $this.parents('.mcComment'),
+		comments = $this.parents('.mcComments'),
 		info = $this.parents('.mComments').find('.mcInfo');
 	jQuery.ajax({
 		type : 'POST', url : '/templates/protostar/php/mCommentsAdmin.php', dataType: 'json', 
@@ -104,7 +105,7 @@ function removeComment_mc( event ) {
 			data.ids = data.ids.map(function(val, ind) {
 				return '[mcid="'+ val +'"]';
 			}).join();
-			comments.filter(data.ids).remove();
+			comments.find(data.ids).remove();
 		}
 	});
 }
@@ -133,7 +134,6 @@ function addCommet_mc(event) {
 				level: comment.attr('level'),
 				method: 'add'},
 		success: function( data ) {
-			console.log(data);
 			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'+data.id+'" level="'+data.level+'" branchId="'+ data.branchId +'">'  +
 						'<div class="mcEmail">'+data.email+'</div>' +
 						'<div class="mcTime">'+data.utime+'</div>' +
