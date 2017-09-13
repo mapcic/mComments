@@ -77,7 +77,8 @@ function loadPage($table, $offset, $num) {
 		$query = $db->getQuery(true)
 			->select('*')
 			->from($table)
-			->where($db->qn('branchId').' = '.$val->id);
+			->where($db->qn('branchId').' = '.$val->id)
+			->order($db->qn('utime').' ASC, '.$db->qn('id').' ASC');
 		$comments = $db->setQuery($query)->loadObjectList();
 		$comments = sortComment($comments);
 

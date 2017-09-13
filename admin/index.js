@@ -109,7 +109,12 @@ function addCommet_mc(event) {
 						'<div class="mcAnswer">Ответить</div>' +
 					'</div>';
 			
-			mc.find('.mcComments').pretend(div);
+			if (data.level == 0) {
+				mc.find('.mcComments').pretend(div);
+			} else {
+				mc.find('.mcComments [mcid="'+comment.attr('mcid')+'"]').after(div);
+			}
+			
 			email.val('');
 			msg.val('');
 			comment.attr('mcid', 0).attr('branchId', 0);

@@ -142,7 +142,24 @@ function addCommet_mc(event) {
 						'<div class="mcAnswer">Ответить</div>' +
 					'</div>';
 			
-			mc.find('.mcComments').prepend(div);
+			if (data.level != 0) {
+				var flag = true,
+					node = mc.find('.mcComments .mcComment[mcid="'+comment.attr('mcid')+'"]'),
+					startLevel = node.attr('level');
+				while (flag) {
+					var next = node.next();
+					if( next == undefined || next.attr('level') == undefined || next.attr('level') <= startLevel) {
+						node.after(div);
+
+						flag = false;
+					}
+
+					node = next;
+				}
+			} else {
+				mc.find('.mcComments').prepend(div);
+			}
+
 			email.val('');
 			msg.val('');
 			comment.attr('mcid', 0).attr('branchId', 0);
