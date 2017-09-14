@@ -1,5 +1,4 @@
 <?php
-
 function getChild($comments, $level, $parentId){
 	$out = [];
 	foreach ($comments[$level] as $key => $val) {
@@ -179,8 +178,12 @@ function info() {
 	$db = JFactory::getDbo();
 	$query = $db->getQuery(true)
 		->select('COUNT('.$db->quoteName('id').')')
-		->where($db->qn('level').' = 0')
 		->from($db->qn($table));
+		
+	if ($table != '#__mcomments_last') {
+		$query->where($db->qn('level').' = 0');
+	}
+
 	$len = $db->setQuery($query)->loadResult();
 
 	$out = array(
