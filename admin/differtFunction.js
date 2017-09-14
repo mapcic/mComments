@@ -155,9 +155,26 @@ function showFormP() {
 
 
 // commnet last
-function initL() {}
+function initL() {
+	var mc = jQuery('#mcLast'),
+		info = mc.find('.mcInfo'),
+		talbe = info.attr('table');
 
-function loadL(event) {}
+	jQuery.ajax({
+		type: 'POST', dataType: 'json',
+		url : '/templates/protostar/php/mCommentsAdmin.php',
+		data: { table: talbe,
+				method: 'info'},
+		success: function(data) {
+			info.attr('len', data.len).attr('offset', 0).attr('table', talbe);
+			mc.find('.mcComments').empty();
+			mc.find('.mcMore').removeClass('ShliambOff').trigger('click');
+		}
+	});
+}
+
+function loadL() {
+}
 
 function commentL() {}
 
