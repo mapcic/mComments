@@ -21,7 +21,7 @@
 	}
 </style>
 
-<script type="text/javascript" src="/templates/protostar/js/mCommnetsAdmin"></script>
+<script type="text/javascript" onload="mComments();" src="/templates/protostar/js/mCommentsAdmin.js" defer></script>
 
 <?php 
 function getOptions() {
@@ -42,7 +42,7 @@ function getOptions() {
 <div id="mCommentsAdmin">
 
 	<div id="mcLast" class="mComments">
-		<div class="mcInfo ShliambOff" offset="0" num="5" table="#__mcomments_last"></div>
+		<div class="mcInfo ShliambOff" offset="0" num="3" table="#__mcomments_last"></div>
 
 		<div class="mcHead"></div>
 
