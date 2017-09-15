@@ -40,15 +40,15 @@ function changePage(event) {
 	var $this = jQuery(this),
 		mc = $this.parents('.mComments'),
 		info = mc.find('.mcInfo'),
-		talbe = $this.val();
+		table = $this.val();
 
 	jQuery.ajax({
 		type: 'POST', dataType: 'json',
 		url : '/templates/protostar/php/mCommentsAdmin.php',
-		data: { table: talbe,
+		data: { table: table,
 				method: 'info'},
 		success: function(data) {
-			info.attr('len', data.len).attr('offset', 0).attr('table', talbe);
+			info.attr('len', data.len).attr('offset', 0).attr('table', table);
 			mc.find('.mcComments').empty();
 			mc.find('.mcMore').removeClass('ShliambOff').trigger('click');
 		}
@@ -158,22 +158,68 @@ function showFormP() {
 function initL() {
 	var mc = jQuery('#mcLast'),
 		info = mc.find('.mcInfo'),
-		talbe = info.attr('table');
+		table = info.attr('table');
 
 	jQuery.ajax({
 		type: 'POST', dataType: 'json',
 		url : '/templates/protostar/php/mCommentsAdmin.php',
-		data: { table: talbe,
+		data: { table: table,
 				method: 'info'},
 		success: function(data) {
-			info.attr('len', data.len).attr('offset', 0).attr('table', talbe);
+			info.attr('len', data.len).attr('offset', 0).attr('table', table);
 			mc.find('.mcComments').empty();
-			mc.find('.mcMore').removeClass('ShliambOff').trigger('click');
+			mc.find('.mcMore').removeClass('ShliambOff').on('click', loadL).trigger('click');
 		}
 	});
 }
 
 function loadL() {
+	var $this = jQuery(this),
+		node = $this.parents('.mComments'),
+		info = node.find('.mcInfo');
+
+	jQuery.ajax({
+		type : 'POST', dataType: 'json',
+		url : '/templates/protostar/php/mCommentsAdmin.php',
+		data: { offset: info.attr('offset'),
+				num: info.attr('num'),
+				table: info.attr('table'), 
+				method: 'load'},
+		success: function(data) {
+			var comments = node.find('.mcComments');
+
+			comments.find('.mcComment').removeClass('lastComment');
+
+			jQuery.each(data.items, function(ind, val) {
+				if (node.find('.mcComment[table='+val.table+'][branchId='+val.branchId+']').length == 0){
+					jQuery.each(val.items, function(i, v) {
+						jQuery(commentHTML(v)).appendTo(comments);
+						comments.children().last().attr('table', val.table);
+					});
+				}
+				markL(val.mark);
+			});
+
+			node.find('.mcAnswer').off('click', showFormL).on('click', showFormL);
+			node.find('.mcRemove').off('click', rmL).on('click', rmL);
+
+			info.attr('offset', +info.attr('offset') + data.items.length);
+
+			if ( info.attr('len') == info.attr('offset') ) {
+				$this.addClass('ShliambOff');
+			}
+		}
+	});
+}
+
+function markL(ids) {
+	ids = ids instanceof Array? ids : [ids];
+
+	var idsStr = ids.map(function(val, ind) {
+		return '[mcid="'+ val +'"]';
+	}).join();
+
+	jQuery('#mcLast .mcComment').filter(idsStr).addClass('lastComment');
 }
 
 function commentL() {}
