@@ -36,14 +36,8 @@ function loadLast($table, $offset, $num) {
 		->setLimit($num, $offset);
 	$last = $db->setQuery($query)->loadObjectList();
 
-	$branchIds = [];
-	$branchs = [];
+	$out = [];
 	foreach ($last as $key => $val) {
-		if (in_array($val->branchId, $branchIds)) {
-			continue;
-		}
-		$branchIds[] = $val->branchId;
-
 		$subQuery = $db->getQuery(true)
 			->select($db->qn('branchId'))
 			->from($db->qn($val->table_name))
@@ -55,10 +49,15 @@ function loadLast($table, $offset, $num) {
 		$comments = $db->setQuery($query)->loadObjectList();
 		$comments = sortComment($comments);
 
-		$branchs = array_merge($branchs, $comments);
+		$out[] = array(
+			'items' => $comments,
+			'branchId' => $comments[0]->branchId,
+			'table' => $val->table_name,
+			'mark' => $val->mcid
+		);
 	}
 
-	return $branchs;
+	return $out;
 }
 
 function loadPage($table, $offset, $num) {
