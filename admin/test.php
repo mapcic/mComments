@@ -4,20 +4,31 @@
 		display: none;
 	}
 	.mcLevel0 {
-		background-color: green;
-		margin-top: 5px;
+		background-color: darkgrey;
+		margin-top: 10px;
 	}
 	.mcLevel1 {
-		background-color: orange;
-		margin-left: 20px;
+		background-color: darkgrey;
+		margin-top: 2px;
+		margin-left: 40px;
 	}	
 	.mcLevel2 {
-		background-color: red;
-		margin-left: 40px;
+		background-color: darkgrey;
+		margin-top: 2px;
+		margin-left: 60px;
 	}
 	.mcLevel3 {
-		background-color: blue;
-		margin-left: 60px;
+		background-color: darkgrey;
+		margin-top: 2px;
+		margin-left: 120px;
+	}
+	.mcLevel4 {
+		background-color: darkgrey;
+		margin-top: 2px;
+		margin-left: 160px;
+	}
+	.lastComment {
+		background: cadetblue !important;
 	}
 </style>
 
