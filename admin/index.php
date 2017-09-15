@@ -33,6 +33,7 @@ function loadLast($table, $offset, $num) {
 	$query = $db->getQuery(true)
 		->select('*')
 		->from($db->qn($table))
+		->order($db->qn('id').' DESC')
 		->setLimit($num, $offset);
 	$last = $db->setQuery($query)->loadObjectList();
 
@@ -57,7 +58,7 @@ function loadLast($table, $offset, $num) {
 		);
 	}
 
-	return $out;
+	return ($out);
 }
 
 function loadPage($table, $offset, $num) {
