@@ -181,7 +181,8 @@ function loadL() {
 	jQuery.ajax({
 		type : 'POST', dataType: 'json',
 		url : '/templates/protostar/php/mCommentsAdmin.php',
-		data: { offset: info.attr('offset'),
+		data: { offset: jQuery('.mcComment[last=1]'),
+				// offset: info.attr('offset'),
 				num: info.attr('num'),
 				table: info.attr('table'), 
 				method: 'load'},
@@ -194,7 +195,7 @@ function loadL() {
 				if (node.find('.mcComment[table='+val.table+'][branchId='+val.branchId+']').length == 0){
 					jQuery.each(val.items, function(i, v) {
 						jQuery(commentHTML(v)).appendTo(comments);
-						comments.children().last().attr('table', val.table);
+						comments.children().last().attr('table', val.table).attr('last', 0);
 					});
 				}
 				markL(val.mark);
@@ -219,12 +220,32 @@ function markL(ids) {
 		return '[mcid="'+ val +'"]';
 	}).join();
 
-	jQuery('#mcLast .mcComment').filter(idsStr).addClass('lastComment');
+	jQuery('#mcLast .mcComment').filter(idsStr).addClass('lastComment').attr('last', 1);
 }
 
 function commentL() {}
 
-function rmL() {}
+function rmL() {
+	var $this = jQuery(this),
+		comment = $this.parents('.mcComment'),
+		comments = $this.parents('.mcComments'),
+		info = $this.parents('.mComments').find('.mcInfo');
+
+	jQuery.ajax({
+		type : 'POST', dataType: 'json', 
+		url : '/templates/protostar/php/mCommentsAdmin.php',
+		data: { id : comment.attr('mcid'),
+				branchId: comment.attr('branchId'),
+				table: comment.attr('table'),
+				method: 'removeLast'},
+		success: function(data) {
+			data.ids = data.ids.map(function(val, ind) {
+				return '[mcid="'+ val +'"][table="'+comment.attr('table')+'"]';
+			}).join();
+			comments.find(data.ids).remove();
+		}
+	});
+}
 
 function showFormL() {}
 
