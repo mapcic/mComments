@@ -13,7 +13,7 @@ function loadP() {
 	jQuery.ajax({
 		type : 'POST', dataType: 'json',
 		url : '/templates/protostar/php/mCommentsAdmin.php',
-		data: { offset: info.attr('offset'),
+		data: { offset: node.find('.mcComment[level=0]').length,
 				num: info.attr('num'),
 				table: info.attr('table'), 
 				method: 'load'},
@@ -27,9 +27,7 @@ function loadP() {
 			node.find('.mcAnswer').off('click', showFormP).on('click', showFormP);
 			node.find('.mcRemove').off('click', rmP).on('click', rmP);
 
-			info.attr('offset', +info.attr('offset') + data.items.length);
-
-			if ( info.attr('len') == info.attr('offset') ) {
+			if ( info.attr('len') == node.find('.mcComment[level=0]').length ) {
 				$this.addClass('ShliambOff');
 			}
 		}
@@ -107,6 +105,8 @@ function commentP() {
 			if (data.level == 0) {
 				info.attr('len', +info.attr('len') + 1);
 			}
+
+			initL();
 		}
 	});
 }
@@ -130,6 +130,8 @@ function rmP() {
 				return '[mcid="'+ val +'"]';
 			}).join();
 			comments.find(data.ids).remove();
+
+			initL();
 		}
 	});
 }
@@ -166,13 +168,20 @@ function initL() {
 		data: { table: table,
 				method: 'info'},
 		success: function(data) {
-			info.attr('len', data.len).attr('offset', 0).attr('table', table);
-			mc.find('.mcComments').empty();
-			mc.find('.mcMore').removeClass('ShliambOff').on('click', loadL).trigger('click');
+			info.attr('len', data.len)
+				.attr('table', table);
+			mc.find('.mcComments')
+				.empty();
+			mc.find('.mcMore')
+				.removeClass('ShliambOff')
+				.off('click', loadL)
+				.on('click', loadL)
+				.trigger('click');
 		}
 	});
 
-	mc.find('.mcButton').on('click', loadL);
+	mc.find('.mcButton').off('click', commentL)
+		.on('click', commentL);
 }
 
 function loadL() {
@@ -207,9 +216,7 @@ function loadL() {
 			node.find('.mcAnswer').off('click', showFormL).on('click', showFormL);
 			node.find('.mcRemove').off('click', rmL).on('click', rmL);
 
-			info.attr('offset', +info.attr('offset') + data.items.length);
-
-			if ( info.attr('len') == info.attr('offset') ) {
+			if ( info.attr('len') == node.find('.mcComment[last=1]') ) {
 				$this.addClass('ShliambOff');
 			}
 		}
@@ -234,13 +241,9 @@ function commentL() {
 		email = form.find('.mcEmail'),
 		msg = form.find('.mcTextarea');
 
-	console.log(1);
-
 	if ( !isMsg(msg.val()) || !isEmail(email.val()) ) {
 		return 0;
 	}
-
-	console.log(2);
 
 	jQuery.ajax({
 		type : 'POST', dataType: 'json', 
@@ -265,7 +268,7 @@ function commentL() {
 						node.after(div);
 						node.next()
 							.addClass('lastComment')
-							.attr('table', table)
+							.attr('table', form.attr('table'))
 							.attr('last', 1)
 						flag = false;
 					}
@@ -283,9 +286,7 @@ function commentL() {
 				form.addClass('ShliambOff');
 			}
 
-			if (data.level == 0) {
-				info.attr('len', +info.attr('len') + 1);
-			}
+			info.attr('len', +info.attr('len') + 1);
 		}
 	});
 }
@@ -294,7 +295,8 @@ function rmL() {
 	var $this = jQuery(this),
 		comment = $this.parents('.mcComment'),
 		comments = $this.parents('.mcComments'),
-		info = $this.parents('.mComments').find('.mcInfo');
+		info = $this.parents('.mComments').find('.mcInfo'),
+		offset = comments.find('.mcComment[last=1]').length;
 
 	jQuery.ajax({
 		type : 'POST', dataType: 'json', 
@@ -308,6 +310,7 @@ function rmL() {
 				return '[mcid="'+ val +'"][table="'+comment.attr('table')+'"]';
 			}).join();
 			comments.find(data.ids).remove();
+			info.attr('len', +info.attr('len') - offset + comments.find('.mcComment[last=1]').length);
 		}
 	});
 }
