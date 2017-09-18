@@ -171,6 +171,8 @@ function initL() {
 			mc.find('.mcMore').removeClass('ShliambOff').on('click', loadL).trigger('click');
 		}
 	});
+
+	mc.find('.mcButton').on('click', loadL);
 }
 
 function loadL() {
@@ -194,7 +196,9 @@ function loadL() {
 				if (node.find('.mcComment[table='+val.table+'][branchId='+val.branchId+']').length == 0){
 					jQuery.each(val.items, function(i, v) {
 						jQuery(commentHTML(v)).appendTo(comments);
-						comments.children().last().attr('table', val.table).attr('last', 0);
+						comments.children().last()
+							.attr('table', val.table)
+							.attr('last', 0);
 					});
 				}
 				markL(val.mark);
@@ -222,7 +226,69 @@ function markL(ids) {
 	jQuery('#mcLast .mcComment').filter(idsStr).addClass('lastComment').attr('last', 1);
 }
 
-function commentL() {}
+function commentL() {
+	var $this = jQuery(this),
+		mc = $this.parents('.mComments'),
+		info = mc.find('.mcInfo'),
+		form = $this.parents('.mcForm'),
+		email = form.find('.mcEmail'),
+		msg = form.find('.mcTextarea');
+
+	console.log(1);
+
+	if ( !isMsg(msg.val()) || !isEmail(email.val()) ) {
+		return 0;
+	}
+
+	console.log(2);
+
+	jQuery.ajax({
+		type : 'POST', dataType: 'json', 
+		url : '/templates/protostar/php/mCommentsAdmin.php',
+		data: { email : email.val(),
+				msg : msg.val(), 
+				branchId: form.attr('branchId'),
+				parentId : form.attr('mcid'), 
+				table: form.attr('table'), 
+				level: form.attr('level'),
+				method: 'add'},
+		success: function( data ) {
+			var div = commentHTML(data);
+			
+			if (data.level != 0) {
+				var flag = true,
+					node = mc.find('.mcComments .mcComment[mcid="'+form.attr('mcid')+'"]'),
+					startLevel = node.attr('level');
+				while (flag) {
+					var next = node.next();
+					if( next == undefined || next.attr('level') == undefined || next.attr('level') <= startLevel) {
+						node.after(div);
+						node.next()
+							.addClass('lastComment')
+							.attr('table', table)
+							.attr('last', 1)
+						flag = false;
+					}
+					node = next;
+				}
+			} else {
+				mc.find('.mcComments').prepend(div);
+			}
+
+			email.val('');
+			msg.val('');
+			form.attr('mcid', 0).attr('branchId', 0);
+
+			if (form.hasClass('mcFormFloat')) {
+				form.addClass('ShliambOff');
+			}
+
+			if (data.level == 0) {
+				info.attr('len', +info.attr('len') + 1);
+			}
+		}
+	});
+}
 
 function rmL() {
 	var $this = jQuery(this),
@@ -246,7 +312,26 @@ function rmL() {
 	});
 }
 
-function showFormL() {}
+function showFormL() {
+	var $this = jQuery(this),
+		mc = $this.parents('.mComments'),
+		comment = $this.parents('.mcComment'),
+		parentId = comment.attr('mcid'),
+		branchId = comment.attr('branchId'),
+		table = comment.attr('table'),
+		floatForm = mc.find('.mcFormFloat');
+
+	if (+branchId == 0) {
+		branchId = parentId;
+	}
+
+	comment.after(floatForm);
+	floatForm.attr('mcid', parentId)
+		.attr('branchId', branchId)
+		.attr('level', +comment.attr('level')+1)
+		.attr('table', table)
+		.removeClass('ShliambOff');
+}
 
 // common function
 
