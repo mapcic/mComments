@@ -181,8 +181,7 @@ function loadL() {
 	jQuery.ajax({
 		type : 'POST', dataType: 'json',
 		url : '/templates/protostar/php/mCommentsAdmin.php',
-		data: { offset: jQuery('.mcComment[last=1]'),
-				// offset: info.attr('offset'),
+		data: { offset: jQuery('.mcComment[last=1]').length,
 				num: info.attr('num'),
 				table: info.attr('table'), 
 				method: 'load'},
@@ -237,7 +236,7 @@ function rmL() {
 		data: { id : comment.attr('mcid'),
 				branchId: comment.attr('branchId'),
 				table: comment.attr('table'),
-				method: 'removeLast'},
+				method: 'remove'},
 		success: function(data) {
 			data.ids = data.ids.map(function(val, ind) {
 				return '[mcid="'+ val +'"][table="'+comment.attr('table')+'"]';

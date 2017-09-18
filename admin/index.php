@@ -112,14 +112,6 @@ function remove() {
 	$branchId = $_POST['branchId'];
 
 	$db = JFactory::getDbo();
-	if ($table == '#__mcomments_last') {
-		$query = $db->getQuery(true)
-			->select($db->qn('table_name'))
-			->from($db->qn($table));
-		$tablePage = $db->setQuery($query)->loadResult();
-	} else {
-		$tablePage = $table;
-	}
 
 	$subQuery = $db->getQuery(true)
 			->select($db->qn('level'))
@@ -245,7 +237,7 @@ function initJoomlaApi() {
 }
 
 $nameFunc = $_POST['method' ];
-if ( in_array($nameFunc, array('load', 'info', 'remove', 'add')) ) {
+if ( in_array($nameFunc, array('load', 'info', 'remove', 'add', 'removeLast')) ) {
 	initJoomlaApi();
 	$nameFunc();
 }
