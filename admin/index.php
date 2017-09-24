@@ -50,11 +50,17 @@ function loadLast($table, $offset, $num) {
 		$comments = $db->setQuery($query)->loadObjectList();
 		$comments = sortComment($comments);
 
+		$query = $db->getQuery(true)
+			->select($db->qn('path'))
+			->from($db->qn('#__mcomments_ids'))
+			->where($db->qn('table_name').' = '.$db->q($val->table_name))
+
 		$out[] = array(
 			'items' => $comments,
 			'branchId' => $comments[0]->branchId,
 			'table' => $val->table_name,
-			'mark' => $val->mcid
+			'mark' => $val->mcid,
+			'page' => $page
 		);
 	}
 
@@ -114,9 +120,9 @@ function remove() {
 	$db = JFactory::getDbo();
 
 	$subQuery = $db->getQuery(true)
-			->select($db->qn('level'))
-			->from($db->qn($tablePage))
-			->where($db->qn('id').' = '.$id);
+		->select($db->qn('level'))
+		->from($db->qn($tablePage))
+		->where($db->qn('id').' = '.$id);
 	$query = $db->getQuery(true)
 		->select('*')
 		->from($db->qn($tablePage))
