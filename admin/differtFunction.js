@@ -207,7 +207,8 @@ function loadL() {
 						jQuery(commentHTML(v)).appendTo(comments);
 						comments.children().last()
 							.attr('table', val.table)
-							.attr('last', 0);
+							.attr('last', 0)
+							.prepend('<div class="mcPageName">'+val.page+'</div>');
 					});
 				}
 				markL(val.mark);

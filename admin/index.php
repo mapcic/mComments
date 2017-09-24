@@ -53,7 +53,9 @@ function loadLast($table, $offset, $num) {
 		$query = $db->getQuery(true)
 			->select($db->qn('path'))
 			->from($db->qn('#__mcomments_ids'))
-			->where($db->qn('table_name').' = '.$db->q($val->table_name))
+			->where($db->qn('table_name').' = '.$db->q($val->table_name));
+		$page = $db->setQuery($query)
+			->loadResult();
 
 		$out[] = array(
 			'items' => $comments,
