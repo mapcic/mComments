@@ -1,4 +1,3 @@
-// comment page
 function initP() {
 	jQuery('#mcPage select.mcTables').on('change', changePage);
 	jQuery('#mcPage .mcMore').on('click', loadP);
@@ -12,7 +11,7 @@ function loadP() {
 
 	jQuery.ajax({
 		type : 'POST', dataType: 'json',
-		url : '/templates/protostar/php/mCommentsAdmin.php',
+		url : '/path/to/mCommentsAdmin.php',
 		data: { offset: node.find('.mcComment[level=0]').length,
 				num: info.attr('num'),
 				table: info.attr('table'), 
@@ -42,7 +41,7 @@ function changePage(event) {
 
 	jQuery.ajax({
 		type: 'POST', dataType: 'json',
-		url : '/templates/protostar/php/mCommentsAdmin.php',
+		url : '/path/to/mCommentsAdmin.php',
 		data: { table: table,
 				method: 'info'},
 		success: function(data) {
@@ -94,6 +93,9 @@ function commentP() {
 				mc.find('.mcComments').prepend(div);
 			}
 
+			mc.find('.mcAnswer').off('click', showFormP).on('click', showFormP);
+			mc.find('.mcRemove').off('click', rmP).on('click', rmP);
+
 			email.val('');
 			msg.val('');
 			form.attr('mcid', 0).attr('branchId', 0);
@@ -119,7 +121,7 @@ function rmP() {
 
 	jQuery.ajax({
 		type : 'POST', dataType: 'json', 
-		url : '/templates/protostar/php/mCommentsAdmin.php',
+		url : '/path/to/mCommentsAdmin.php',
 		data: { id : comment.attr('mcid'),
 				branchId: comment.attr('branchId'),
 				table: info.attr('table'),
@@ -164,7 +166,7 @@ function initL() {
 
 	jQuery.ajax({
 		type: 'POST', dataType: 'json',
-		url : '/templates/protostar/php/mCommentsAdmin.php',
+		url : '/path/to/mCommentsAdmin.php',
 		data: { table: table,
 				method: 'info'},
 		success: function(data) {
@@ -191,7 +193,7 @@ function loadL() {
 
 	jQuery.ajax({
 		type : 'POST', dataType: 'json',
-		url : '/templates/protostar/php/mCommentsAdmin.php',
+		url : '/path/to/mCommentsAdmin.php',
 		data: { offset: jQuery('.mcComment[last=1]').length,
 				num: info.attr('num'),
 				table: info.attr('table'), 
@@ -211,7 +213,7 @@ function loadL() {
 							.prepend('<div class="mcPageName">'+val.page+'</div>');
 					});
 				}
-				markL(val.mark);
+				markL(val.mark, val.table);
 			});
 
 			node.find('.mcAnswer').off('click', showFormL).on('click', showFormL);
@@ -224,14 +226,15 @@ function loadL() {
 	});
 }
 
-function markL(ids) {
+function markL(ids, table) {
 	ids = ids instanceof Array? ids : [ids];
 
 	var idsStr = ids.map(function(val, ind) {
-		return '[mcid="'+ val +'"]';
+		return '[mcid="'+ val +'"][table="'+table+'"]';
 	}).join();
 
-	jQuery('#mcLast .mcComment').filter(idsStr).addClass('lastComment').attr('last', 1);
+	jQuery('#mcLast .mcComment').filter(idsStr)
+		.addClass('lastComment').attr('last', 1);
 }
 
 function commentL() {
@@ -248,7 +251,7 @@ function commentL() {
 
 	jQuery.ajax({
 		type : 'POST', dataType: 'json', 
-		url : '/templates/protostar/php/mCommentsAdmin.php',
+		url : '/path/to/mCommentsAdmin.php',
 		data: { email : email.val(),
 				msg : msg.val(), 
 				branchId: form.attr('branchId'),
@@ -279,6 +282,9 @@ function commentL() {
 				mc.find('.mcComments').prepend(div);
 			}
 
+			mc.find('.mcAnswer').off('click', showFormL).on('click', showFormL);
+			mc.find('.mcRemove').off('click', rmL).on('click', rmL);
+
 			email.val('');
 			msg.val('');
 			form.attr('mcid', 0).attr('branchId', 0);
@@ -301,7 +307,7 @@ function rmL() {
 
 	jQuery.ajax({
 		type : 'POST', dataType: 'json', 
-		url : '/templates/protostar/php/mCommentsAdmin.php',
+		url : '/path/to/mCommentsAdmin.php',
 		data: { id : comment.attr('mcid'),
 				branchId: comment.attr('branchId'),
 				table: comment.attr('table'),

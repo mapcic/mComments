@@ -34,7 +34,7 @@ function addCommet_mc(event) {
 	}
 
 	jQuery.ajax({
-		type : 'POST', url : '/templates/protostar/php/mCommentsAdd.php', dataType: 'json', 
+		type : 'POST', url : '/path/to/mCommentsAdd.php', dataType: 'json', 
 		data: { email : email.val(), msg : msg.val(), branchId: branchId, parent : parent, table: table, level: level },
 		success: function( data ) {
 			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'+data.id+'" level="'+data.level+'" branchId="'+ data.branchId +'">'  +
@@ -58,6 +58,10 @@ function addCommet_mc(event) {
 				var more = mc.find('.mcMore');
 				more.attr('len', +more.attr('len')+1);
 			}
+
+			mc.find('.mcAnswer')
+				.off('click', addCommetFloatForm_mc)
+				.on('click', addCommetFloatForm_mc);
 		}
 	});
 }
@@ -92,7 +96,7 @@ function moreComments_mc(event) {
 		console.log(offset);
 
 	jQuery.ajax({
-		type : 'POST', url : '/templates/protostar/php/mCommentsMore.php', dataType: 'json', 
+		type : 'POST', url : '/path/to/mCommentsMore.php', dataType: 'json', 
 		data: { len: len, num: offset, table: table },
 		success: function( data ) {
 			$this.attr('len', data.len).attr('num', data.num);
@@ -129,7 +133,3 @@ function isMsg( msg ) {
 	}
 	return true;
 }
-
-jQuery(document).ready(function(){
-	mComments();
-});

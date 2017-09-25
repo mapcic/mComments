@@ -123,11 +123,11 @@ function remove() {
 
 	$subQuery = $db->getQuery(true)
 		->select($db->qn('level'))
-		->from($db->qn($tablePage))
+		->from($db->qn($table))
 		->where($db->qn('id').' = '.$id);
 	$query = $db->getQuery(true)
 		->select('*')
-		->from($db->qn($tablePage))
+		->from($db->qn($table))
 		->where($db->qn('branchId').' = '.$branchId
 			.' AND '.
 			$db->qn('level').' > ('.$subQuery.')');
@@ -135,7 +135,7 @@ function remove() {
 
 	$query = $db->getQuery(true)
 		->select('*')
-		->from($db->qn($tablePage))
+		->from($db->qn($table))
 		->where($db->qn('id').' = '.$id);
 	$root = $db->setQuery($query)->loadObjectList();
 
@@ -150,7 +150,7 @@ function remove() {
 	}
 
 	$query = $db->getQuery(true)
-		->delete($db->qn($tablePage))
+		->delete($db->qn($table))
 		->where(array(
 			$db->qn('id').' IN ('.implode(',', $ids).')'
 		));
@@ -160,7 +160,7 @@ function remove() {
 		->delete($db->qn('#__mcomments_last'))
 		->where(array(
 			$db->qn('mcid').' IN ('.implode(',', $ids).')',
-			$db->qn('table_name').' = '.$db->q($tablePage)
+			$db->qn('table_name').' = '.$db->q($table)
 		));
 	$db->setQuery($query)->execute();
 
