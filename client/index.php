@@ -47,6 +47,7 @@ function getComments( $path = null ){
 	$num = 2;
 
 	$path = urldecode((JFactory::getURI())->getPath()); 
+	$path = ($path != '/')? $path : '/mainpage';
 
 	$query = $db->getQuery(true)
 		->select($db->qn('table_name'))
