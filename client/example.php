@@ -48,11 +48,18 @@ function getComments( $path = null ){
 	$num = 2;
 
 	$path = urldecode((JFactory::getURI())->getPath()); 
+	$path = ($path != '/')? $path : '/mainpage';
+
+	$altPath = (substr($path, -1) == '/')? substr($path, 0, -1);: $path.'/';
+
 
 	$query = $db->getQuery(true)
 		->select($db->qn('table_name'))
 		->from($db->qn('#__mcomments_ids'))
-		->where($db->qn('path').' = '.$db->q($path));
+		->where(
+			$db->qn('path').' = '.$db->q($path)
+			.'OR'.
+			$db->qn('path').' = '.$db->q($altPath));
 	$from = $db->setQuery($query)
 		->loadResult();
 
