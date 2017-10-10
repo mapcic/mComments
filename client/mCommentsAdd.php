@@ -23,8 +23,7 @@ $comment = (object) array(
 	'message' => $msg,
 	'parent' => $parent,
 	'branchId' => $branchId,
-	'level' => $level,
-	'utime' => date('U')
+	'level' => $level
 );
 
 $id = 0;
@@ -41,6 +40,8 @@ $lastComment = (object) array(
 	'table_name' => $table
 );
 $db->insertObject('#__mcomments_last', $lastComment);
+
+$comment->utime = date('Y-m-d H:i:s');
 
 echo json_encode($comment);
 return 1;

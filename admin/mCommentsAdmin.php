@@ -46,7 +46,8 @@ function loadLast($table, $offset, $num) {
 		$query = $db->getQuery(true)
 			->select('*')
 			->from($db->qn($val->table_name))
-			->where($db->qn('branchId').' = ('.$subQuery.')');
+			->where($db->qn('branchId').' = ('.$subQuery.')')
+			->order($db->qn('utime').' DESC');
 		$comments = $db->setQuery($query)->loadObjectList();
 		$comments = sortComment($comments);
 
@@ -85,7 +86,7 @@ function loadPage($table, $offset, $num) {
 			->select('*')
 			->from($table)
 			->where($db->qn('branchId').' = '.$val->id)
-			->order($db->qn('utime').' ASC, '.$db->qn('id').' ASC');
+			->order($db->qn('utime').', '.$db->qn('id'));
 		$comments = $db->setQuery($query)->loadObjectList();
 		$comments = sortComment($comments);
 
@@ -212,8 +213,7 @@ function add() {
 		'message' => $msg,
 		'parent' => $parent,
 		'branchId' => $branchId,
-		'level' => $level,
-		'utime' => date('U')
+		'level' => $level
 	);
 
 	$id = 0;
@@ -231,6 +231,7 @@ function add() {
 	);
 	$db->insertObject('#__mcomments_last', $lastComment);
 
+	$comment->utime = date('Y-m-d H:i:s');
 	echo json_encode($comment);
 }
 

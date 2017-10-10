@@ -93,7 +93,6 @@ function moreComments_mc(event) {
 		len = $this.attr('len'),
 		num = $this.attr('num'),
 		offset = +$this.parents('.mComments').find('.mcLevel0').length;
-		console.log(offset);
 
 	jQuery.ajax({
 		type : 'POST', url : '/path/to/mCommentsMore.php', dataType: 'json', 
@@ -138,8 +137,8 @@ function getDate(date) {
 	var date = new Date(date),
 		options = {
 			'year' : date.getFullYear()+'',
-			'month' : date.getMonth()+'',
-			'day' : date.getDay()+'',
+			'month' : +date.getMonth() + 1 +'',
+			'day' : date.getDate()+'',
 			'hours' : date.getHours()+'',
 			'minutes' : date.getMinutes()+'',
 			'seconds' : date.getSeconds()+''

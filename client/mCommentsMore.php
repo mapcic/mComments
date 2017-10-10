@@ -61,7 +61,7 @@ $query = $db->getQuery(true)
 	->select('*')
 	->from($db->qn($from))
 	->where($db->qn('state').' = 1 AND '.$db->qn('level').' <> 0')
-	->order($db->qn('utime').' DESC');
+	->order($db->qn('utime'));
 $comments = $db->setQuery($query)
 	->loadObjectList();
 
