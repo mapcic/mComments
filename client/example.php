@@ -48,9 +48,9 @@ function getComments( $path = null ){
 	$num = 2;
 
 	$path = urldecode((JFactory::getURI())->getPath()); 
-	$path = ($path != '/')? $path : '/mainpage';
+	$path = ($path != '/')? $path : '/home';
 
-	$altPath = (substr($path, -1) == '/')? substr($path, 0, -1);: $path.'/';
+	$altPath = (substr($path, -1) == '/')? substr($path, 0, -1) : $path.'/';
 
 
 	$query = $db->getQuery(true)

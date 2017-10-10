@@ -361,10 +361,27 @@ function isMsg( msg ) {
 	return true;
 }
 
+function getDate(date) {
+	var date = new Date(date),
+		options = {
+			'year' : date.getFullYear()+'',
+			'month' : date.getMonth()+'',
+			'day' : date.getDay()+'',
+			'hours' : date.getHours()+'',
+			'minutes' : date.getMinutes()+'',
+			'seconds' : date.getSeconds()+''
+		}
+	for (key in options) {
+		options[key] = options[key].length == 1? 0 + options[key] : options[key]; 
+	}
+
+	return options.hours+':'+options.minutes+':'+options.seconds+' '+options.day+'.'+options.month+'.'+options.year;
+}
+
 function commentHTML(data) {
 	var params = 'class="mcComment mcLevel'+data.level+'" mcid="'+data.id+'" level="'+data.level+'" branchId="'+data.branchId+'"',
 		email = '<div class="mcEmail">'+data.email+'</div>',
-		utime = '<div class="mcTime">'+data.utime+'</div>',
+		utime = '<div class="mcTime">'+getDate(data.utime)+'</div>',
 		msg = '<div class="mcMessаge">'+data.message+'</div>',
 		rm = '<div class="mcRemove">Удалить</div>',
 		answ = '<div class="mcAnswer">Ответить</div>';

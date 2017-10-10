@@ -39,7 +39,7 @@ function addCommet_mc(event) {
 		success: function( data ) {
 			var div = '<div class="mcComment mcLevel'+data.level+'" mcid="'+data.id+'" level="'+data.level+'" branchId="'+ data.branchId +'">'  +
 						'<div class="mcEmail">'+data.email+'</div>' +
-						'<div class="mcTime">'+data.utime+'</div>' +
+						'<div class="mcTime">'+getDate(data.utime)+'</div>' +
 						'<div class="mcMessаge">'+data.message+'</div>' +
 						'<div class="mcAnswer">Ответить</div>' +
 					'</div>';
@@ -107,7 +107,7 @@ function moreComments_mc(event) {
 			jQuery.each(data.items, function(ind, val) {
 				var div = '<div class="mcComment mcLevel'+val.level+'" mcid="'+val.id+'" level="'+val.level+'" branchId="'+val.branchId+'">' +
 							'<div class="mcEmail">'+val.email+'</div>' +
-							'<div class="mcTime">'+val.utime+'</div>' +
+							'<div class="mcTime">'+getDate(val.utime)+'</div>' +
 							'<div class="mcMessаge">'+val.message+'</div>' +
 							'<div class="mcAnswer">Ответить</div>' +
 						'</div>',
@@ -132,4 +132,21 @@ function isMsg( msg ) {
 		return false;
 	}
 	return true;
+}
+
+function getDate(date) {
+	var date = new Date(date),
+		options = {
+			'year' : date.getFullYear()+'',
+			'month' : date.getMonth()+'',
+			'day' : date.getDay()+'',
+			'hours' : date.getHours()+'',
+			'minutes' : date.getMinutes()+'',
+			'seconds' : date.getSeconds()+''
+		}
+	for (key in options) {
+		options[key] = options[key].length == 1? 0 + options[key] : options[key]; 
+	}
+
+	return options.hours+':'+options.minutes+':'+options.seconds+' '+options.day+'.'+options.month+'.'+options.year;
 }
